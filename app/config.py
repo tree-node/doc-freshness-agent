@@ -43,6 +43,7 @@ class Settings:
     # --- アプリ設定 ---
     watch_root: Path
     db_path: Path
+    snapshots_dir: Path
 
     @classmethod
     def load(cls) -> "Settings":
@@ -59,6 +60,7 @@ class Settings:
             github_token=os.getenv("GITHUB_TOKEN") or None,
             watch_root=_path_from_env("WATCH_ROOT", "./demo-data"),
             db_path=_path_from_env("DB_PATH", "./data/app.sqlite"),
+            snapshots_dir=_path_from_env("SNAPSHOTS_DIR", "./data/snapshots"),
         )
 
     def require(self, field: str) -> str:

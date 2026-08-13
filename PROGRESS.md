@@ -8,7 +8,8 @@
 
 ## 今やっているタスク
 
-- 次は **e-Gov クライアント + スナップショット差分（Stage 0 の入力を作るところ）**。`scripts/verify_egov.py` の条抽出ロジック（`iter_articles` / `article_map`）をそのまま `app/` 側へ移して育てる。OrcaRouter 呼び出しはその次
+- 次は **Stage 0（差分の分解とクエリ化）= 最初のLLM呼び出し**。入力は `python -m app.cli check <law_id> --json` が吐く ChangeEvent（`diffs[]` に before/after が入っている）。出力スキーマは DESIGN.md の Stage 0 節のとおり。あわせて OrcaRouter クライアント（`app/llm/`）を作る（`orcarouter/auto` は使わない・段階ごとにモデル明示指定）
+- 注意: 1イベントの差分は育介法で27件・施行規則で82件ある。**Stage 0 に差分を丸ごと渡さず、差分1件＝変更単位1件を基本にする**（DESIGN.mdの「変更単位に分解」はこの粒度で満たせる見込み。トークン量と精度の実測で確認する）
 
 ## 次にやる（優先度順）
 
@@ -28,6 +29,7 @@
 ## 完了
 
 - 2026-08-13: **e-Gov API v2 実機確認 全PASS**（`scripts/verify_egov.py`、標準ライブラリのみ・依存なしで再実行可）。法令ID特定 / 改正履歴21件取得 / asofで改正前後の条文取得 / 条・項の構造化取得（JSON・XML両方）を確認。**時間巻き戻し方式の技術リスクは解消**
+- 2026-08-13: **e-Gov クライアント + スナップショット差分を実装**（`app/egov/`、CLI `python -m app.cli`）。時間巻き戻しデモの機構が実データで動作: `snapshot 403AC0000000076 --asof 2025-03-01` → `check 403AC0000000076` で実在の2025年改正を差分として検知（変更23・追加4）。テスト22件パス（うちネットワーク非依存の単体テスト15件）、`scripts/verify_egov.py` は実データ回帰チェックとして全PASS
 - 2026-08-13: **プロジェクト雛形作成**。`app/`（FastAPI+SQLite+.env読み込み）と `frontend/`（React+Vite+Tailwind v4）を分離、`/api/health` をVite devプロキシ経由で疎通確認、pytest 7件パス
 - 2026-08-13: 実装前調査3件完了。①e-Gov API v2: 時点指定(asof)・認証不要・JSON/XMLを確認、改正前後の条文を直接取得可能。②モデル就業規則: 最新は令和7年12月版（育介法2025施行後の版=反映済みと判断、書き換え時に該当条を目視確認）。**厚労省「育児・介護休業等に関する規則の規定例」R7.4/10施行対応版のWord版がDL可能**→育児介護休業規程のベースに最適（出典明示要）。③OrcaRouter: 無料Hacker枠は完全なゲートウェイ、**Embeddings対応を公式明記**、レート上限は低め→Stage 2並列制限を要実装
 - 2026-08-12: デモ用改正の候補調査完了（本命/サブ/delete枠の3候補を特定、ブロッカー欄参照）。法令API v2の時点指定機能を発見
@@ -47,13 +49,23 @@
 
 ## 決定ログ（新しいものを上に追記）
 
+- 2026-08-13: 法令本文の取得形式は **XML ではなく JSON（`json_format=light`）を採用** → DESIGN.md 分割ルールを更新済み。理由: 同じ条・項構造が取れて扱いが軽い。ただし公式に「試行版・仕様変更あり」の注記があるため、パース層を `app/egov/parser.py` に隔離してXMLへ退避可能な状態を保つ
+- 2026-08-13: **条文の識別キーは「構造パス」にする（`app/egov/parser.py`）**。実装の落とし穴を実データで踏んだ結果の設計
+  - **条見出し（第一条など）だけをキーにしてはいけない**: 育介法は本則79条＋附則100条で、附則の「第一条」だけで37件ある。dictのキーにすると179条が89件に潰れる（初版の検証スクリプトが実際にこれで過少カウントした）
+  - キー形式: `本則/第四章/第十六条の二`、`附則(令和六年五月三一日法律第四二号)/第二条`。附則は**改正法令番号（AmendLawNum）で識別**する（位置は改正で動くため）
+  - **キーに章名を含めない**: 2025年改正で「第四章 子の看護休暇」→「第四章 子の看護等休暇」のように章名は変わる。含めるとその章の全条が「削除＋追加」に化ける。キーは章番号のみ、章名の変化は `#heading` ユニットとして別途検出する
+  - **条（Article）だけを拾うと落ちるものがある**（実データで確認）: ①附則4件は Article を持たず Paragraph が直下 ②施行規則には制定文（EnactStatement）③Chapter配下に Section ネスト。すべて Provision として拾う（原則4「見逃し側に倒す」）
+  - 効果: 育介法の抽出ユニット数は 89 → 198。**2025改正の経過措置（附則第二条・第四条の追加）が拾えるようになった**（従来は完全に欠落。DESIGN.md「本則＋対応する経過措置は1変更にまとめてよい」の前提が満たせる）
+- 2026-08-13: モジュール構成を確定。`app/egov/client.py`（API呼び出し・リトライは5xxとネットワーク断のみ、4xxはリトライしない）/ `parser.py`（**JSON形式の仕様変更に備えて隔離**。壊れたらここだけXMLへ差し替え）/ `snapshot.py`（スナップショット保存＋差分＝Stage 0 の入力）。スナップショットは `SNAPSHOTS_DIR`（既定 `./data/snapshots`）に法令IDごとのJSON。CLIは `python -m app.cli {revisions|snapshot|check}`
+- 2026-08-13: 巡回で差分なしの場合も結果として返す（`check_law` は None を返し、CLIは「変更なし」と表示）。DESIGN.md 原則3・ホームの「最近のチェック履歴」に「変更なし」を出すため、握りつぶさない
 - 2026-08-13: **e-Gov 法令API v2 の実機確認済みパラメータ（実装はこれに従う）**
   - 法令ID: 育児・介護休業法 = `403AC0000000076`（平成三年法律第七十六号）/ 同施行規則 = `403M50002000025`（平成三年労働省令第二十五号）。**同名の「船員に関する〜施行規則」`403M50000800036` が別に存在するため、`law_title` 部分一致だけでIDを確定させない**
   - 時点指定: `asof=YYYY-MM-DD`（ハイフン区切り）。**公布日ではなく施行日基準**で「指定時点以前で最新のリビジョン」が返る。`/laws`・`/law_data`・`/keyword` で使用可、`/law_revisions` にはない。`law_revision_id` を直接指定した場合は asof は無視される
   - 本文取得: `GET /api/2/law_data/{law_id}?response_format=json&law_full_text_format=json&json_format=light`。`json_format=light` は `{"Article": {"ArticleTitle", "ArticleCaption", "Paragraph":[{"Num","ParagraphSentence":{"Sentence":[...]}}]}}` の構造で、**条・項を正規表現なしで取り出せる**（XMLでも `Article`/`Paragraph@Num` で同等）。ただし公式に「JSON形式は試行版・仕様変更の可能性あり」の注記あり → **パースは1モジュールに隔離してXMLへ退避可能にしておく**
   - 条単位取得: `elm=Article_16_2`。**枝番はアンダースコア連結**（`Article_16の2` / `Article_16-2` は 400）
   - 改正履歴: `GET /api/2/law_revisions/{law_id}` → `revisions[]` に `amendment_enforcement_date`（施行日）・`current_revision_status`（`CurrentEnforced`/`PreviousEnforced`/`UnEnforced`）。育介法は21件、**2026-10-01施行の未施行改正も既に登録済み**（施行前の先回り検知に使える）
-  - 実測差分（`asof=2025-03-01` vs 現行）: 育介法 = 条追加2・本文変更21 / 施行規則 = 条追加44・本文変更30。第十六条の二の見出しが「子の看護休暇」→「子の看護等休暇」。**育介法2025をデモに使う前提は技術的に成立**
+  - 実測差分（`asof=2025-03-01` vs 現行）: 育介法 = 変更23・追加4 / 施行規則 = 変更34・追加48（いずれも削除0）。第十六条の二の見出しが「子の看護休暇」→「子の看護等休暇」。**育介法2025をデモに使う前提は技術的に成立**
+    - ※この行の件数は 2026-08-13 に訂正済み。初版の検証スクリプトが条見出しだけをキーにしていたため附則が潰れて過少カウントしていた（旧記載: 育介法 追加2・変更21 / 施行規則 追加44・変更30）
 - 2026-08-13: 雛形の構成を確定。`app/config.py`（.env読み込み・相対パスはリポジトリルート基準に解決・キー未設定でもimportは通し `require()` で明示的に落とす）/ `app/db.py`（sqlite3、WAL・foreign_keys ON。**スキーマはパイプライン実装と同時に入れる**）/ `app/main.py`（`/api/health` はキーの値を返さず設定有無のboolのみ）。フロントは Tailwind v4（`@tailwindcss/vite` プラグイン、設定ファイルなし）、Vite dev の `/api` → `localhost:8000` プロキシ。テストは pytest（`tests/conftest.py` で DB_PATH を一時ディレクトリへ向け、リポジトリ内にDBを作らない）
 - 2026-08-13: 開発環境はdevcontainer（Anthropicリファレンス実装ベース）+ --dangerously-skip-permissions。ネットワークは許可リスト方式（laws.e-gov.go.jp / api.orcarouter.ai / pypi / npm を追加）。マウントはリポジトリのみ、git pushはリポジトリ限定PAT、.envは予算上限付き開発キーのみ。「機能1つ動いたらcommit+push」を運用に追加。セットアップは45分タイムボックス、詰まったらホスト+acceptEditsに退避。ホストでのdangerously直接実行は禁止
 
@@ -89,7 +101,7 @@
 
 （各セッション終了時にここを書き換える。書く内容: どこまで動くか / 中断箇所と再開手順 / 直近で嵌った点と回避策。前セッションの内容は不要になったら消してよい——履歴は決定ログと完了に残す）
 
-- **どこまで動くか**: `python scripts/verify_egov.py`（依存なし）で e-Gov 実機確認が全PASS。`uvicorn app.main:app` + `npm run dev` で `/api/health` がVite devプロキシ経由まで通る。`pytest` 7件パス。パイプライン（Stage 0〜3）・DBスキーマ・DocumentSource はまだ無い
-- **再開手順**: 「今やっているタスク」の e-Gov クライアント実装から。条の抽出は `scripts/verify_egov.py` の `iter_articles` / `article_map` を `app/` へ移して使う
+- **どこまで動くか**: 正本側は貫通済み。`python -m app.cli snapshot <law_id> --asof 2025-03-01` → `check <law_id> --json out.json` で、実在の改正を差分として検知しStage 0の入力JSONまで出せる。`uvicorn app.main:app` + `npm run dev` で `/api/health` がVite devプロキシ経由まで通る。`pytest` 22件パス、`scripts/verify_egov.py` 全PASS。**LLM呼び出し・監視対象の取り込み（DocumentSource）・DBスキーマ・UIはまだ無い**
+- **再開手順**: 「今やっているタスク」の Stage 0 から。入力の作り方は `python -m app.cli check 403AC0000000076 --json /tmp/event.json` で確認できる（スナップショットは `data/snapshots/` にあるが gitignore 対象なので、無ければ先に `snapshot --asof 2025-03-01` で初期化する）
 - **嵌った点と回避策（開発環境固有・重要）**: リポジトリが Windows マウント上にあり **シンボリックリンクを作れない**。そのため ①`python -m venv .venv` も `uv venv .venv` もリポジトリ内では失敗する → venv はサンドボックス側 `/home/agent/.venvs/dfa` に作る（`$DFA_VENV`）②`npm install` は `--no-bin-links` が必要。その結果 `node_modules/.bin` が無く **`npm run dev` は使えない** → `node node_modules/vite/bin/vite.js` を直接叩く。**package.json のスクリプトは標準のまま**にしてある（ホスト・他メンバーの環境では `npm run dev` が普通に動くため）
 - 予定どおり `.env` は未コミット（`.gitignore:4`）。`MODEL_STAGE0/2/3` は空のまま＝モデル名は正解セット完成後に決定する方針を維持
