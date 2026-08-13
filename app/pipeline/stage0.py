@@ -14,6 +14,7 @@ DESIGN.md の決定:
 from __future__ import annotations
 
 import json
+from difflib import SequenceMatcher
 from typing import Any
 
 from app.egov.snapshot import ProvisionDiff
@@ -21,9 +22,13 @@ from app.llm.client import INJECTION_GUARD, ChatResult, CostLog, LLMError, parse
 from app.pipeline.models import Change
 
 # プロンプトを変えたら必ず上げる（判定キャッシュのキーに含まれる）
-PROMPT_VERSION = "stage0-v1"
+PROMPT_VERSION = "stage0-v2"
 
 MAX_EXCERPT_CHARS = 1200
+
+# 出力の上限。条が長いと生成が上限に張り付いてJSONが途中で切れ、毎回フォールバックしていた
+# （労基法第39条で発生。2,000で頭打ちになり「JSONとして解釈できません」を繰り返した）
+MAX_OUTPUT_TOKENS = 4000
 
 SYSTEM_PROMPT = f"""あなたは日本の法令改正を読み解き、企業の社内文書への影響を調べるための検索クエリを作る専門家です。
 
@@ -66,6 +71,9 @@ USER_TEMPLATE = """## 法令
 ## 施行日
 {enforcement_date}
 
+## 変わった部分（条文を機械的に突き合わせて抽出したもの）
+{fragments}
+
 ## 変更前の条文
 {before}
 
@@ -93,11 +101,46 @@ def _default_change_type(diff: ProvisionDiff) -> str:
     return {"added": "add", "removed": "delete", "changed": "amend"}[diff.kind]
 
 
+def changed_fragments(before: str | None, after: str | None, limit: int = 8) -> str:
+    """変わった部分だけを機械的に抜き出す。
+
+    **条文全文を渡すだけでは足りない**。長い条は前後を切り詰めるしかなく、変更箇所が
+    切り落とされると、モデルには「ほぼ同じ2つの文章」しか見えない。実際に労基法第39条
+    （2,500字）で、新設された第7項が切り落とされ「変更はありません」と要約された。
+    最初の段での見逃しは後段では取り返せないので、差分は必ず明示して渡す。
+    """
+    if not before or not after:
+        return "（新設または削除のため、条文全体が変更にあたります）"
+
+    matcher = SequenceMatcher(None, before, after)
+    lines: list[str] = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        old, new = before[i1:i2], after[j1:j2]
+        if tag == "insert":
+            lines.append(f"- 追加: 「{_clip(new)}」")
+        elif tag == "delete":
+            lines.append(f"- 削除: 「{_clip(old)}」")
+        else:
+            lines.append(f"- 変更: 「{_clip(old)}」 → 「{_clip(new)}」")
+        if len(lines) >= limit:
+            lines.append("- （ほかにも変更箇所があります）")
+            break
+    return "\n".join(lines) or "（機械的な突き合わせでは差分が見つかりませんでした）"
+
+
+def _clip(text: str, limit: int = 300) -> str:
+    flat = " ".join(text.split())
+    return flat if len(flat) <= limit else flat[:limit] + "…"
+
+
 def build_user_prompt(diff: ProvisionDiff, law_title: str, enforcement_date: str | None) -> str:
     return USER_TEMPLATE.format(
         law_title=law_title,
         label=diff.label,
         enforcement_date=enforcement_date or "不明",
+        fragments=wrap_untrusted(changed_fragments(diff.before, diff.after)),
         before=wrap_untrusted(_truncate(diff.before)),
         after=wrap_untrusted(_truncate(diff.after)),
     )
@@ -129,7 +172,13 @@ def _validate(payload: dict[str, Any], diff: ProvisionDiff) -> list[str]:
 
 
 def _normalize(text: str) -> str:
-    return "".join(text.split())
+    """照合用の正規化。
+
+    「変わった部分」は長いと末尾を「…」で切ってあり、モデルがそこから引用すると
+    省略記号ごとコピーしてくる。これをハルシネーション扱いすると、正しく読めているのに
+    毎回フォールバックしてしまう（実際に労基法第39条でそうなった）。
+    """
+    return "".join(text.split()).replace("…", "").replace("...", "")
 
 
 def _fallback_change(diff: ProvisionDiff, change_id: str, enforcement_date: str | None, note: str) -> Change:
@@ -175,7 +224,9 @@ def decompose_diff(
                 + "\n".join(f"- {p}" for p in problems)
             )
         try:
-            result: ChatResult = chat.chat(model=model, system=SYSTEM_PROMPT, user=prompt)
+            result: ChatResult = chat.chat(
+                model=model, system=SYSTEM_PROMPT, user=prompt, max_tokens=MAX_OUTPUT_TOKENS
+            )
         except LLMError as exc:
             return _fallback_change(diff, change_id, enforcement_date, f"LLM呼び出し失敗: {exc}")
 
@@ -185,7 +236,13 @@ def decompose_diff(
         try:
             payload = parse_json_object(result.text)
         except (LLMError, json.JSONDecodeError):
-            problems = ["JSONとして解釈できませんでした。JSONのみを出力してください"]
+            if result.usage.completion_tokens >= MAX_OUTPUT_TOKENS * 0.98:
+                # 上限に張り付いた＝途中で切れた。原因が分かる形で伝えて短く出させる
+                problems = [
+                    "出力が長すぎて途中で切れました。要約と引用を短くし、JSONだけを出力してください"
+                ]
+            else:
+                problems = ["JSONとして解釈できませんでした。JSONのみを出力してください"]
             continue
 
         problems = _validate(payload, diff)

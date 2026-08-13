@@ -15,7 +15,7 @@ from app.egov.snapshot import ChangeEvent
 from app.index import ChunkIndex
 from app.llm.client import CostLog, Embedder
 from app.pipeline import stage0, stage1, stage2, stage3
-from app.pipeline.cache import JudgementCache, cache_key
+from app.pipeline.cache import JudgementCache, cache_key, document_hash
 from app.pipeline.models import (
     Alert,
     Change,
@@ -131,9 +131,15 @@ def _process_change(
         report(f"      注意: {note}")
 
     findings: list[Finding] = []
+    doc_hashes = _document_hashes(index)
     for candidate in passed:
         chunk = index.get(candidate.chunk_id)
-        key = cache_key(change.fingerprint, chunk.content_hash, stage3.PROMPT_VERSION)
+        key = cache_key(
+            change.fingerprint,
+            chunk.content_hash,
+            stage3.PROMPT_VERSION,
+            doc_hashes.get(chunk.doc_id, ""),
+        )
         cached = cache.get(key) if cache else None
         if cached is not None:
             finding = Finding(**{**cached, "chunk_id": chunk.chunk_id, "doc_id": chunk.doc_id, "label": chunk.label})
@@ -163,6 +169,14 @@ def _process_change(
     return ChangeResult(
         change=change, candidates=candidates, scores=scores, findings=findings, funnel=funnel
     )
+
+
+def _document_hashes(index: ChunkIndex) -> dict[str, str]:
+    """文書ごとの同一性ハッシュ（ファイル名ではなく中身から作る）。"""
+    by_doc: dict[str, list[str]] = {}
+    for chunk in index.chunks:
+        by_doc.setdefault(chunk.doc_id, []).append(chunk.content_hash)
+    return {doc_id: document_hash(hashes) for doc_id, hashes in by_doc.items()}
 
 
 def expand_alerts(

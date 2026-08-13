@@ -12,7 +12,7 @@ from app.egov.snapshot import ChangeEvent, ProvisionDiff
 from app.index import build_index
 from app.llm.client import ChatResult, CostLog, LLMError, Usage, wrap_untrusted
 from app.pipeline import stage0, stage2, stage3
-from app.pipeline.cache import JudgementCache, cache_key
+from app.pipeline.cache import JudgementCache, cache_key, document_hash
 from app.pipeline.models import Candidate, Change
 from app.pipeline.run import ModelSet, expand_alerts, run_pipeline
 
@@ -132,6 +132,66 @@ def test_stage0_fallback_maps_removed_diff_to_delete() -> None:
     chat = FakeChat(lambda *_: "これはJSONではありません")
     change = stage0.decompose_diff(chat, removed, "chg-001", "法", None, model="m0")
     assert change.change_type == "delete"
+
+
+def test_stage0_shows_the_change_even_when_the_article_is_long() -> None:
+    """長い条でも変更箇所がプロンプトに必ず入ること。
+
+    条文全文を切り詰めて渡すだけだと、変更が末尾にある長い条（労基法第39条など）で
+    変更箇所が切り落とされ、モデルには「ほぼ同じ2つの文章」しか見えなくなる。
+    実際にこれで「条文の文言に変更はありません」と要約され、年5日の時季指定義務の
+    新設を見逃した。
+    """
+    padding = "この法律において使用する用語の意義は、次のとおりとする。" * 60
+    long_diff = ProvisionDiff(
+        key="本則/第三十九条",
+        kind="changed",
+        label="第三十九条",
+        title="第三十九条",
+        before=padding,
+        after=padding + "使用者は、有給休暇の日数のうち五日については、時季を定めて与えなければならない。",
+    )
+    assert len(long_diff.before) > stage0.MAX_EXCERPT_CHARS
+
+    prompt = stage0.build_user_prompt(long_diff, "労働基準法", "2019-04-01")
+    assert "五日については、時季を定めて" in prompt
+    assert "追加" in prompt
+
+
+def test_stage0_accepts_an_excerpt_that_carries_the_truncation_mark() -> None:
+    """「変わった部分」は長いと末尾が「…」で切られる。そこから引用されても弾かない。"""
+    chat = FakeChat(lambda *_: stage0_response(after_excerpt="九歳に達する日以後の最初の…"))
+    change = stage0.decompose_diff(chat, DIFF, "chg-001", "法", "2025-04-01", model="m0")
+    assert len(chat.calls) == 1  # リトライしていない
+    assert not change.needs_human_review
+
+
+def test_stage0_says_so_when_the_output_was_cut_off() -> None:
+    """生成が上限に張り付いてJSONが切れたときは、そう分かる形で伝えて短く出させる。
+
+    労基法第39条でこれが起き、原因が「JSONとして解釈できません」としか出ないまま
+    毎回フォールバックしていた。
+    """
+    truncated = '{"change_type": "amend", "summary": "途中で切れ'
+
+    class CappedChat(FakeChat):
+        def chat(self, model, system, user, max_tokens=2000, **kwargs):
+            result = super().chat(model, system, user, max_tokens, **kwargs)
+            return ChatResult(
+                text=result.text,
+                usage=Usage(model=model, prompt_tokens=100, completion_tokens=max_tokens),
+            )
+
+    chat = CappedChat(lambda *_: truncated)
+    stage0.decompose_diff(chat, DIFF, "chg-001", "法", "2025-04-01", model="m0")
+    assert "途中で切れました" in chat.calls[1]["user"]
+
+
+def test_changed_fragments_lists_each_kind_of_edit() -> None:
+    assert "追加" in stage0.changed_fragments("あいう", "あいうえお")
+    assert "削除" in stage0.changed_fragments("あいうえお", "あいう")
+    assert "変更" in stage0.changed_fragments("上限は八十時間", "上限は四十五時間")
+    assert "新設または削除" in stage0.changed_fragments(None, "新しい条文")
 
 
 def test_stage0_records_cost() -> None:
@@ -474,6 +534,36 @@ def test_cache_key_is_per_change_and_chunk_and_prompt_version() -> None:
     key = cache_key(change.fingerprint, "hash1", "stage3-v1")
     assert key != cache_key(change.fingerprint, "hash1", "stage3-v2")
     assert key != cache_key("other", "hash1", "stage3-v1")
+
+
+def test_cache_key_separates_documents_with_identical_clauses() -> None:
+    """条文が同一でも文書が違えば別々に判定する。
+
+    「雇用契約書のひな形」と「締結済みの雇用契約書」は休暇条項が1文字も違わないが、
+    期限の種別は immediate と on_renewal に分かれる。チャンクだけをキーにすると
+    先に判定した方が使い回され、必ずどちらかを取り違える（実データで踏んだ）。
+    """
+    change = a_change()
+    template = cache_key(change.fingerprint, "同じ条文", "v1", document_hash(["a", "b"]))
+    signed = cache_key(change.fingerprint, "同じ条文", "v1", document_hash(["a", "c"]))
+    assert template != signed
+
+
+def test_cache_key_is_shared_by_byte_identical_documents() -> None:
+    """同一内容のファイルが複数あるときは1回だけ判定する（ファイル名は見ない）。"""
+    change = a_change()
+    original = cache_key(change.fingerprint, "条文", "v1", document_hash(["a", "b"]))
+    copied = cache_key(change.fingerprint, "条文", "v1", document_hash(["a", "b"]))
+    assert original == copied
+
+
+def test_stage3_prompt_does_not_contain_the_file_name() -> None:
+    """ファイル名・フォルダ構造は判定に使わない（中身で判定する）。"""
+    index = make_index()
+    chunk = a_chunk(index)
+    prompt = stage3.build_user_prompt(a_change(), chunk, index, "育介法")
+    assert chunk.doc_id not in prompt
+    assert "就業規則.md" not in prompt
 
 
 def test_cache_avoids_repeating_stage3(tmp_path) -> None:

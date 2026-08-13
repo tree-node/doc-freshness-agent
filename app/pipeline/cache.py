@@ -10,13 +10,31 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
 
-def cache_key(change_fingerprint: str, chunk_hash: str, prompt_version: str) -> str:
-    return f"{change_fingerprint}:{chunk_hash}:{prompt_version}"
+def cache_key(
+    change_fingerprint: str, chunk_hash: str, prompt_version: str, document_hash: str = ""
+) -> str:
+    """判定1件のキー。
+
+    `document_hash` は**文書の中身から作る**（ファイル名ではない）ので:
+      - 同一内容のファイルが複数置かれていても → 同じキー = 判定は1回、起票は全ファイルに展開
+      - 条文が1文字も違わなくても文書全体が違えば → 別のキー = 別々に判定される
+
+    後者が要る理由: 「雇用契約書のひな形」と「締結済みの雇用契約書」は休暇条項が同一でも、
+    期限の種別が immediate と on_renewal で分かれる。チャンクだけをキーにすると
+    先に判定した方の結果が使い回され、必ずどちらかを取り違える。
+    """
+    return f"{change_fingerprint}:{chunk_hash}:{document_hash}:{prompt_version}"
+
+
+def document_hash(chunk_hashes: list[str]) -> str:
+    """文書の同一性。チャンクの本文ハッシュを順に連ねたもの。"""
+    return hashlib.sha256("|".join(chunk_hashes).encode("utf-8")).hexdigest()[:16]
 
 
 class JudgementCache:

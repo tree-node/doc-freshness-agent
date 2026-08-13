@@ -20,7 +20,7 @@ from app.index import ChunkIndex
 from app.llm.client import INJECTION_GUARD, CostLog, LLMError, parse_json_object, wrap_untrusted
 from app.pipeline.models import Candidate, Change, Finding
 
-PROMPT_VERSION = "stage3-v1"
+PROMPT_VERSION = "stage3-v2"  # プロンプトを変えたら必ず上げる（判定キャッシュのキー）
 
 ESCALATION_THRESHOLD = 0.6
 CONTEXT_CHARS = 300  # 前後文脈の長さ
@@ -104,9 +104,13 @@ CHANGE_TEMPLATE = """## 法令の変更
 """
 
 # --- 可変サフィックス（候補ごとに変わる。必ず後ろに置く） ---
+# **ファイル名は渡さない**（ファイル名・フォルダ構造は判定に使わない＝中身で判定する）。
+# 代わりに文書の冒頭を渡す。ひな形なのか締結済みの契約なのかは、そこを読めば分かる。
 CHUNK_TEMPLATE = """## 判定対象の社内文書
 
-文書名: {doc_id}
+### 文書の冒頭（どういう文書かの判断に使う）
+{opening}
+
 文書内の位置: {label}
 
 ### 該当箇所
@@ -115,6 +119,8 @@ CHUNK_TEMPLATE = """## 判定対象の社内文書
 ### 前後の文脈（参考。判定対象はあくまで上の該当箇所）
 {context}
 """
+
+OPENING_CHARS = 400
 
 REQUIRED_KEYS = ("law_applicability", "impact", "confidence")
 VALID_APPLICABILITY = ("applicable", "not_applicable", "unclear")
@@ -147,10 +153,18 @@ def neighbor_context(index: ChunkIndex, chunk: Chunk) -> str:
     return wrap_untrusted("\n".join(parts)) if parts else "（なし）"
 
 
+def document_opening(index: ChunkIndex, doc_id: str) -> str:
+    """文書の冒頭。表題や「締結日」「ひな形」といった手がかりがここに出る。"""
+    for chunk in index.chunks:
+        if chunk.doc_id == doc_id:
+            return chunk.text[:OPENING_CHARS]
+    return "（不明）"
+
+
 def build_user_prompt(change: Change, chunk: Chunk, index: ChunkIndex, law_title: str) -> str:
     # 並び順は固定: 共通プレフィックス → 可変サフィックス
     return build_change_prefix(change, law_title) + "\n" + CHUNK_TEMPLATE.format(
-        doc_id=chunk.doc_id,
+        opening=wrap_untrusted(document_opening(index, chunk.doc_id)),
         label=chunk.label,
         chunk=wrap_untrusted(chunk.text),
         context=neighbor_context(index, chunk),
