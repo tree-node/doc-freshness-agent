@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全体像 — 設計思想と体制 / ドキュメント鮮度監視エージェント</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c2733; --ink-soft:#4c5a68;
+  --paper:#f6f7f5; --card:#ffffff;
+  --sea:#0d6e63; --sea-deep:#084c45; --sea-mist:#e3efec;
+  --amber:#a8630a; --amber-mist:#faf0dd;
+  --red:#a33131;
+  --line:#dde2de;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans JP',sans-serif;background:var(--paper);color:var(--ink);line-height:1.85;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:56px 28px 80px}
+header{border-bottom:3px solid var(--ink);padding-bottom:26px;margin-bottom:40px}
+.doc-meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:.06em;margin-bottom:12px}
+h1{font-size:28px;font-weight:700;line-height:1.4}
+.lede{margin-top:12px;color:var(--ink-soft);max-width:46em}
+section{margin-bottom:56px}
+h2{font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:baseline;gap:12px}
+h2 .no{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--sea);letter-spacing:.05em}
+.h2-sub{color:var(--ink-soft);font-size:14px;margin-bottom:18px}
+p{margin-bottom:12px}
+.fig{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:16px 0}
+.fig-cap{font-size:12.5px;color:var(--ink-soft);margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:'IBM Plex Sans JP',sans-serif}
+svg .mono{font-family:'IBM Plex Mono',monospace}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;font-size:13.5px}
+th{background:var(--ink);color:#fff;text-align:left;padding:10px 16px;font-weight:500;font-size:12.5px}
+td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+td b.pr{color:var(--sea-deep)}
+
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.pillar{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--sea);border-radius:10px;padding:18px 22px}
+.pillar b{display:block;font-size:14.5px;margin-bottom:4px;color:var(--sea-deep)}
+.pillar p{margin:0;font-size:13px;color:var(--ink-soft)}
+@media(max-width:640px){.pillars{grid-template-columns:1fr}.wrap{padding:36px 16px 60px}h1{font-size:23px}}
+footer{border-top:1px solid var(--line);padding-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="doc-meta">BIG PICTURE — 2026.08.13 / 実装キックオフ用</div>
+  <h1>全体像: 設計思想と開発体制</h1>
+  <p class="lede">実装を始める前に頭に入れておく1枚。プロダクトが「何を・どういう思想で」やるのか（§1〜§3）と、それを「誰が・どういう分担で」作るのか（§4〜§5）。詳細仕様はすべて DESIGN.md にあり、本書は地図に徹する。</p>
+</header>
+
+<!-- ================= §1 ================= -->
+<section>
+  <h2><span class="no">§1</span>プロダクトの中核思想</h2>
+  <p>このプロダクトは「ドキュメントチェッカー」ではない。<b>正本（source of truth）の変化を、依存する文書へ伝播させるエンジン</b>である。法令→社内規定も、実装コード→設計書も、「正が変わった→派生が腐った」という同一構造であり、正本と出口のコネクタを差し替えるだけで任意の領域に適用できる。</p>
+  <div class="pillars">
+    <div class="pillar"><b>原則1 — 主語はイベント</b><p>UIもデータモデルも「正本の変更イベント」が主語。文書の古さ（鮮度）ではなく、変更の影響で語る。緊急度は施行日・影響件数・確信度から。</p></div>
+    <div class="pillar"><b>原則2 — 本体を直接書き換えない</b><p>システムは提案物のみを生成し、適用は必ず人間の承認を経る。経路A=修正版ファイルのDL、経路B=PR。出口が世界に合わせて変わるだけで原則は同一。</p></div>
+    <div class="pillar"><b>原則3 — 影響なしも見せる</b><p>「20件確認し、3件要対応・17件問題なし」。何を見て何を見なかったかを隠さないことが信頼の源泉。ホームの第一声・詳細情報の確認一覧として実装。</p></div>
+    <div class="pillar"><b>原則4 — 見逃し側に倒す</b><p>偽陰性は致命傷、偽陽性は棄却フローで吸収可能。除外判断に迷ったら通す。失敗は黙って握りつぶさず「要人間確認」で起票する。</p></div>
+  </div>
+</section>
+
+<!-- ================= §2 ================= -->
+<section>
+  <h2><span class="no">§2</span>プロダクト全体図（データフロー）</h2>
+  <p class="h2-sub">左から右へ: 正本の変化が、絞り込みと判定を経て、人間の承認付き提案物になるまで。</p>
+  <div class="fig">
+  <svg viewBox="0 0 880 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="プロダクト全体のデータフロー図">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#8a95a0" stroke-width="1.6"/></marker>
+    </defs>
+    <!-- 正本 -->
+    <text x="70" y="26" font-size="12" fill="#4c5a68" text-anchor="middle" font-weight="700">正本</text>
+    <rect x="14" y="40" width="130" height="52" rx="8" fill="#e3efec" stroke="#0d6e63" stroke-width="1"/>
+    <text x="79" y="62" font-size="12.5" text-anchor="middle" font-weight="700" fill="#084c45">法令（e-Gov）</text>
+    <text x="79" y="80" font-size="10.5" text-anchor="middle" fill="#4c5a68">経路A・P0</text>
+    <rect x="14" y="104" width="130" height="52" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="79" y="126" font-size="12.5" text-anchor="middle" font-weight="700" fill="#4c5a68">実装（GitHub）</text>
+    <text x="79" y="144" font-size="10.5" text-anchor="middle" fill="#4c5a68">経路B・P1</text>
+    <!-- 差分検知 -->
+    <line x1="148" y1="98" x2="192" y2="98" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <rect x="196" y="62" width="130" height="72" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="261" y="86" font-size="12.5" text-anchor="middle" font-weight="700">巡回・差分検知</text>
+    <text x="261" y="104" font-size="10.5" text-anchor="middle" fill="#4c5a68">スナップショット比較</text>
+    <text x="261" y="120" font-size="10.5" text-anchor="middle" fill="#4c5a68">イベント→変更×N に分解</text>
+    <!-- 監視対象 -->
+    <text x="261" y="196" font-size="12" fill="#4c5a68" text-anchor="middle" font-weight="700">監視対象（DocumentSource）</text>
+    <rect x="176" y="208" width="170" height="60" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="261" y="230" font-size="11.5" text-anchor="middle">ローカルフォルダ → クラウド</text>
+    <text x="261" y="248" font-size="10.5" text-anchor="middle" fill="#4c5a68">md/txt/docx・構造チャンク化</text>
+    <line x1="261" y1="208" x2="261" y2="176" stroke="#8a95a0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="330" y1="238" x2="392" y2="238" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <!-- パイプライン -->
+    <line x1="330" y1="98" x2="392" y2="98" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <rect x="396" y="46" width="176" height="248" rx="10" fill="#f6f7f5" stroke="#0d6e63" stroke-width="1.2"/>
+    <text x="484" y="70" font-size="12.5" text-anchor="middle" font-weight="700" fill="#084c45">絞り込みパイプライン</text>
+    <rect x="412" y="84" width="144" height="38" rx="6" fill="#fff" stroke="#dde2de"/>
+    <text x="484" y="100" font-size="11" text-anchor="middle">S0 差分の分解・クエリ化</text>
+    <text x="484" y="114" font-size="9.5" text-anchor="middle" fill="#4c5a68" class="mono">中位モデル ×1</text>
+    <rect x="412" y="130" width="144" height="38" rx="6" fill="#fff" stroke="#dde2de"/>
+    <text x="484" y="146" font-size="11" text-anchor="middle">S1 ハイブリッド検索</text>
+    <text x="484" y="160" font-size="9.5" text-anchor="middle" fill="#4c5a68" class="mono">RRF / LLM不使用</text>
+    <rect x="412" y="176" width="144" height="38" rx="6" fill="#fff" stroke="#dde2de"/>
+    <text x="484" y="192" font-size="11" text-anchor="middle">S2 再ランク（0.5 / 15件）</text>
+    <text x="484" y="206" font-size="9.5" text-anchor="middle" fill="#4c5a68" class="mono">安価モデル</text>
+    <rect x="412" y="222" width="144" height="38" rx="6" fill="#e3efec" stroke="#0d6e63"/>
+    <text x="484" y="238" font-size="11" text-anchor="middle" font-weight="700">S3 精査＋根拠照合</text>
+    <text x="484" y="252" font-size="9.5" text-anchor="middle" fill="#084c45" class="mono">高性能モデル</text>
+    <text x="484" y="280" font-size="9.5" text-anchor="middle" fill="#a8630a">迷ったら通す / 失敗は要確認で起票</text>
+    <!-- キャッシュ -->
+    <rect x="396" y="310" width="176" height="40" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="484" y="327" font-size="10.5" text-anchor="middle">判定キャッシュ</text>
+    <text x="484" y="341" font-size="9" text-anchor="middle" fill="#4c5a68" class="mono">hash(変更)×hash(chunk)×ver</text>
+    <line x1="484" y1="294" x2="484" y2="310" stroke="#8a95a0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <!-- 起票 -->
+    <line x1="576" y1="170" x2="620" y2="170" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <rect x="624" y="134" width="116" height="72" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="682" y="158" font-size="12" text-anchor="middle" font-weight="700">起票</text>
+    <text x="682" y="176" font-size="10" text-anchor="middle" fill="#4c5a68">判定と分離し</text>
+    <text x="682" y="191" font-size="10" text-anchor="middle" fill="#4c5a68">全ファイルに展開</text>
+    <!-- UI -->
+    <line x1="682" y1="206" x2="682" y2="232" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <rect x="606" y="236" width="152" height="70" rx="8" fill="#e3efec" stroke="#0d6e63"/>
+    <text x="682" y="258" font-size="11.5" text-anchor="middle" font-weight="700" fill="#084c45">UI（非エンジニア向け）</text>
+    <text x="682" y="276" font-size="10" text-anchor="middle">ホーム→変更の詳細→指摘</text>
+    <text x="682" y="292" font-size="10" text-anchor="middle">承認 / 棄却 / 検討中</text>
+    <!-- 提案物 -->
+    <line x1="758" y1="271" x2="798" y2="271" stroke="#8a95a0" stroke-width="1.4" marker-end="url(#ar)"/>
+    <rect x="802" y="222" width="66" height="46" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="835" y="241" font-size="10.5" text-anchor="middle" font-weight="700">修正版DL</text>
+    <text x="835" y="256" font-size="9" text-anchor="middle" fill="#4c5a68">経路A</text>
+    <rect x="802" y="276" width="66" height="46" rx="8" fill="#fff" stroke="#dde2de"/>
+    <text x="835" y="295" font-size="10.5" text-anchor="middle" font-weight="700">PR作成</text>
+    <text x="835" y="310" font-size="9" text-anchor="middle" fill="#4c5a68">経路B</text>
+    <!-- OrcaRouter -->
+    <rect x="14" y="380" width="854" height="38" rx="8" fill="#faf0dd" stroke="#e8d7b0"/>
+    <text x="441" y="398" font-size="11" text-anchor="middle" fill="#a8630a" font-weight="700">OrcaRouter（全LLM呼び出しの土台）: 段階別モデル固定 ／ コストログ→画面表示 ／ プロンプトキャッシュ ／ ガードレール ／ フェイルオーバー</text>
+    <text x="441" y="412" font-size="9.5" text-anchor="middle" fill="#a8630a">コスト削減の主役は絞り込み設計。OrcaRouterは計測・証明・保護のインフラ</text>
+  </svg>
+  <div class="fig-cap">監査ログは全経路の判断（承認・棄却・対応不要）を根拠法令とセットで記録する（図では省略）。デモは経路Aを「時間巻き戻し」（スナップショットを改正前で初期化→本物のe-Govとの差分で実在の改正を検知）で見せる。</div>
+  </div>
+</section>
+
+<!-- ================= §3 ================= -->
+<section>
+  <h2><span class="no">§3</span>思想が審査基準にどう効くか</h2>
+  <table>
+    <tr><th>審査項目</th><th>対応する設計</th></tr>
+    <tr><td>課題の実在性・ビジネス成立性</td><td>法改正→社内文書の陳腐化は全業界共通。40年ぶり労基法大改正が控える時代背景をストーリーに</td></tr>
+    <tr><td>AIである必然性</td><td>条文差分と社内文書の意味的対応付け（適用可能性判断を含む）はキーワード検索では不可能</td></tr>
+    <tr><td>LLMコスト</td><td>多段絞り込みで約1/70。実測コストを画面表示（「¥23 / 素朴実装比1/70」）</td></tr>
+    <tr><td>セキュリティ</td><td>本体を書き換えない設計＋送信前マスキング＋インジェクション対策タグ＋ゲートウェイの多層防御</td></tr>
+    <tr><td>完成度・デモの説得力</td><td>本物の法令で動く時間巻き戻しデモ／影響なし・適用外の正検知／検出精度を内訳で提示</td></tr>
+    <tr><td>次世代性・独創性</td><td>常時監視×依存グラフ（Copilotの都度実行との差）／非エンジニアUIと技術的透明性の両立</td></tr>
+  </table>
+</section>
+
+<!-- ================= §4 ================= -->
+<section>
+  <h2><span class="no">§4</span>開発体制図（誰が・何を読み書きするか）</h2>
+  <p class="h2-sub">中央のメインエージェントが実装の主体。3つのドキュメントが全員の共有基盤で、サブエージェントには会話コンテキストが渡らないため「参照ファイルパスを渡す」ことで繋ぐ。</p>
+  <div class="fig">
+  <svg viewBox="0 0 880 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="開発体制と情報の流れ">
+    <defs>
+      <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#8a95a0" stroke-width="1.6"/></marker>
+      <marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#0d6e63" stroke-width="1.6"/></marker>
+    </defs>
+    <!-- 人間 -->
+    <rect x="330" y="14" width="220" height="64" rx="10" fill="#1c2733"/>
+    <text x="440" y="40" font-size="13" text-anchor="middle" fill="#fff" font-weight="700">人間（チーム3名）</text>
+    <text x="440" y="60" font-size="10" text-anchor="middle" fill="#c7cdd3">開発 ／ データ＋デモ ／ 記事＋プレゼン</text>
+    <line x1="440" y1="78" x2="440" y2="118" stroke="#8a95a0" stroke-width="1.6" marker-end="url(#ar2)"/>
+    <text x="452" y="102" font-size="10" fill="#4c5a68">指示・承認・判断</text>
+    <!-- main -->
+    <rect x="310" y="122" width="260" height="88" rx="12" fill="#e3efec" stroke="#0d6e63" stroke-width="1.6"/>
+    <text x="440" y="150" font-size="14" text-anchor="middle" font-weight="700" fill="#084c45">メインエージェント</text>
+    <text x="440" y="170" font-size="11" text-anchor="middle" class="mono" fill="#084c45">Claude Opus 5</text>
+    <text x="440" y="190" font-size="10.5" text-anchor="middle" fill="#4c5a68">パイプライン実装・統合・難所デバッグ</text>
+    <!-- Fable -->
+    <rect x="620" y="128" width="128" height="52" rx="10" fill="#fff" stroke="#dde2de" stroke-dasharray="4 3"/>
+    <text x="684" y="150" font-size="11.5" text-anchor="middle" font-weight="700">切り札: Fable 5</text>
+    <text x="684" y="167" font-size="9.5" text-anchor="middle" fill="#4c5a68">難所と設計整合のみ・温存</text>
+    <line x1="570" y1="160" x2="620" y2="155" stroke="#8a95a0" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <!-- docs -->
+    <rect x="14" y="118" width="196" height="150" rx="10" fill="#fff" stroke="#dde2de"/>
+    <text x="112" y="142" font-size="12" text-anchor="middle" font-weight="700">共有ドキュメント基盤</text>
+    <text x="30" y="168" font-size="11" class="mono" font-weight="700" fill="#084c45">CLAUDE.md</text>
+    <text x="30" y="184" font-size="9.5" fill="#4c5a68">憲法。常時読む（原則・制約）</text>
+    <text x="30" y="208" font-size="11" class="mono" font-weight="700" fill="#084c45">DESIGN.md</text>
+    <text x="30" y="224" font-size="9.5" fill="#4c5a68">確定仕様。該当節を参照</text>
+    <text x="30" y="248" font-size="11" class="mono" font-weight="700" fill="#a8630a">PROGRESS.md</text>
+    <text x="30" y="264" font-size="9.5" fill="#4c5a68">毎セッション読み書き（引き継ぎ）</text>
+    <line x1="210" y1="176" x2="310" y2="166" stroke="#0d6e63" stroke-width="1.4" marker-end="url(#ar3)"/>
+    <text x="222" y="164" font-size="9.5" fill="#084c45">開始時に読む</text>
+    <line x1="310" y1="192" x2="210" y2="240" stroke="#a8630a" stroke-width="1.4" marker-end="url(#ar2)"/>
+    <text x="216" y="228" font-size="9.5" fill="#a8630a">終了時に更新</text>
+    <!-- subagents -->
+    <text x="440" y="252" font-size="12" text-anchor="middle" fill="#4c5a68" font-weight="700">サブエージェント（委譲 → 要約だけが返る）</text>
+    <line x1="360" y1="210" x2="150" y2="300" stroke="#8a95a0" stroke-width="1.3" marker-end="url(#ar2)"/>
+    <line x1="410" y1="210" x2="345" y2="300" stroke="#8a95a0" stroke-width="1.3" marker-end="url(#ar2)"/>
+    <line x1="470" y1="210" x2="535" y2="300" stroke="#8a95a0" stroke-width="1.3" marker-end="url(#ar2)"/>
+    <line x1="520" y1="210" x2="730" y2="300" stroke="#8a95a0" stroke-width="1.3" marker-end="url(#ar2)"/>
+
+    <rect x="60" y="304" width="180" height="104" rx="10" fill="#fff" stroke="#dde2de"/>
+    <text x="150" y="328" font-size="12" text-anchor="middle" font-weight="700">docs-researcher</text>
+    <text x="150" y="345" font-size="10" text-anchor="middle" class="mono" fill="#084c45">Sonnet 5</text>
+    <text x="150" y="365" font-size="9.5" text-anchor="middle" fill="#4c5a68">e-Gov v2 / OrcaRouter調査</text>
+    <text x="150" y="381" font-size="9.5" text-anchor="middle" fill="#4c5a68">事実と推測を区別・URL添付</text>
+    <text x="150" y="397" font-size="9.5" text-anchor="middle" fill="#a33131">コードは書かない</text>
+
+    <rect x="255" y="304" width="180" height="104" rx="10" fill="#fff" stroke="#dde2de"/>
+    <text x="345" y="328" font-size="12" text-anchor="middle" font-weight="700">frontend-builder</text>
+    <text x="345" y="345" font-size="10" text-anchor="middle" class="mono" fill="#084c45">Sonnet 5</text>
+    <text x="345" y="365" font-size="9.5" text-anchor="middle" fill="#4c5a68">ui-mock.html を忠実に移植</text>
+    <text x="345" y="381" font-size="9.5" text-anchor="middle" fill="#4c5a68">メインと並行で走る</text>
+    <text x="345" y="397" font-size="9.5" text-anchor="middle" fill="#a33131">frontend/ 以外変更禁止</text>
+
+    <rect x="445" y="304" width="180" height="104" rx="10" fill="#fff" stroke="#dde2de"/>
+    <text x="535" y="328" font-size="12" text-anchor="middle" font-weight="700">test-runner</text>
+    <text x="535" y="345" font-size="10" text-anchor="middle" class="mono" fill="#084c45">Haiku</text>
+    <text x="535" y="365" font-size="9.5" text-anchor="middle" fill="#4c5a68">テスト実行→失敗のみ報告</text>
+    <text x="535" y="381" font-size="9.5" text-anchor="middle" fill="#4c5a68">大量出力をメインから隔離</text>
+    <text x="535" y="397" font-size="9.5" text-anchor="middle" fill="#a33131">修正はしない</text>
+
+    <rect x="640" y="304" width="180" height="104" rx="10" fill="#fff" stroke="#dde2de"/>
+    <text x="730" y="328" font-size="12" text-anchor="middle" font-weight="700">design-guard</text>
+    <text x="730" y="345" font-size="10" text-anchor="middle" class="mono" fill="#084c45">Sonnet 5</text>
+    <text x="730" y="365" font-size="9.5" text-anchor="middle" fill="#4c5a68">コミット前に原則9項目を照合</text>
+    <text x="730" y="381" font-size="9.5" text-anchor="middle" fill="#4c5a68">キー混入・粒度・順序・タグ</text>
+    <text x="730" y="397" font-size="9.5" text-anchor="middle" fill="#a33131">違反のみ指摘（好みは言わない）</text>
+
+    <rect x="60" y="428" width="760" height="30" rx="8" fill="#f6f7f5" stroke="#dde2de"/>
+    <text x="440" y="447" font-size="10.5" text-anchor="middle" fill="#4c5a68">サブエージェントはメインの会話コンテキストを共有しない → 指示には必ず参照ファイルパス（DESIGN.mdの節名等）を含める</text>
+  </svg>
+  <div class="fig-cap">書き込み領域の分割: メイン=バックエンド全般、frontend-builder=frontend/のみ、他は読み取り中心。同一ファイルを複数エージェントに書かせない。</div>
+  </div>
+</section>
+
+<!-- ================= §5 ================= -->
+<section>
+  <h2><span class="no">§5</span>サブエージェントの設計思想</h2>
+  <p class="h2-sub">プロダクトの設計思想と、開発体制の設計思想は相似形になっている。</p>
+  <table>
+    <tr><th>設計原理</th><th>内容</th><th>プロダクト側の対応物</th></tr>
+    <tr><td><b class="pr">① コンテキスト分離</b></td><td>大量出力（テストログ・調査結果）をサブ側に留め、メインには要約だけ返す。メインのコンテキストを本丸（パイプライン実装）に温存</td><td>絞り込みパイプライン: 高性能モデルには絞った候補だけを渡す</td></tr>
+    <tr><td><b class="pr">② 権限の分割</b></td><td>書き込み範囲をエージェントごとに限定（frontend/のみ等）し、衝突と暴走を構造的に防ぐ</td><td>原則2: 本体を直接書き換えない。提案物のみ生成</td></tr>
+    <tr><td><b class="pr">③ モデルの傾斜配分</b></td><td>難易度が確定しているタスクにはモデルを固定で割り当てる（Opus 5=統合・難所、Sonnet 5=自律実装・調査、Haiku=定型）。枠の消費を制御</td><td>段階別モデル固定（orcarouter/auto不使用）と同じ思想</td></tr>
+    <tr><td><b class="pr">④ 原則の外部化</b></td><td>守るべき原則をdesign-guardの定義ファイルに埋め込み、疲れ・急ぎに左右されない機械的なチェックとして毎コミット前に回す</td><td>見逃し担保・エスカレーション表: 「黙って落とさない」を仕組みで保証</td></tr>
+  </table>
+  <p>運用の型は3つだけ覚えれば足りる: <b>調査は並列に投げる</b>（雛形作成と同時にdocs-researcherへ）、<b>コード変更のたびtest-runner</b>、<b>コミット前にdesign-guard</b>。エージェント構成に凝る時間があったら実装に使う——最大の武器はエージェントではなく、CLAUDE.md / DESIGN.md / PROGRESS.md の3ファイルである。</p>
+</section>
+
+<!-- ================= §6 ================= -->
+<section>
+  <h2><span class="no">§6</span>残りの道のり</h2>
+  <table>
+    <tr><th>時点</th><th>ゴール</th></tr>
+    <tr><td class="mono">8/13（今日）</td><td>e-Gov v2検証（初手2時間・最大リスク）→ CLIでパイプライン貫通。frontend-builderがUI着手。改正の最終決定→データ担当着手</td></tr>
+    <tr><td class="mono">8/14 朝</td><td>経路B着手判断（経路Aが貫通している場合のみ）。正解セットで初回評価→モデル・閾値を数字で確定</td></tr>
+    <tr><td class="mono">8/14 22:00</td><td><b>チーム内DL: デモ動画が撮れる状態</b>。時間巻き戻しデモの通し確認</td></tr>
+    <tr><td class="mono">8/15 9:00-15:00</td><td>最終修正・提出（Qiita記事・動画・プレゼン資料）。週間枠が朝リセット→遠慮なく使う</td></tr>
+    <tr><td class="mono">8/16</td><td>本番（渋谷）。ライブはキャッシュ温め済み状態から。死んだら動画へ切り替え</td></tr>
+  </table>
+</section>
+
+<footer>ドキュメント鮮度監視エージェント / 全体像: 設計思想と体制 — 2026.08.13（詳細: DESIGN.md ／ 進捗: PROGRESS.md）</footer>
+</div>
+</body>
+</html>

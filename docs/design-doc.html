@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設計ドキュメント v2 — ドキュメント鮮度監視エージェント</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c2733;
+  --ink-soft:#4c5a68;
+  --paper:#f6f7f5;
+  --card:#ffffff;
+  --sea:#0d6e63;
+  --sea-deep:#084c45;
+  --sea-mist:#e3efec;
+  --amber:#a8630a;
+  --amber-mist:#faf0dd;
+  --red:#a33131;
+  --red-mist:#f9e9e9;
+  --line:#dde2de;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans JP',sans-serif;background:var(--paper);color:var(--ink);line-height:1.85;font-size:15px}
+.wrap{max-width:880px;margin:0 auto;padding:56px 28px 80px}
+
+header{border-bottom:3px solid var(--ink);padding-bottom:28px;margin-bottom:24px}
+.doc-meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:.06em;margin-bottom:14px}
+h1{font-size:30px;font-weight:700;line-height:1.4;letter-spacing:.01em}
+.lede{margin-top:14px;color:var(--ink-soft);max-width:46em}
+.lede strong{color:var(--sea-deep)}
+
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 26px;margin-bottom:44px;font-size:13px;display:flex;flex-wrap:wrap;gap:6px 22px}
+nav.toc a{color:var(--sea-deep);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+nav.toc .toc-no{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-right:5px}
+
+section{margin-bottom:56px}
+h2{font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:baseline;gap:12px}
+h2 .no{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--sea);letter-spacing:.05em}
+.h2-sub{color:var(--ink-soft);font-size:14px;margin-bottom:20px}
+h3{font-size:15.5px;font-weight:700;margin:22px 0 6px}
+p{margin-bottom:12px}
+p.note{font-size:13.5px;color:var(--ink-soft)}
+ul.plain{padding-left:1.4em;margin-bottom:12px}
+ul.plain li{margin-bottom:6px}
+
+.principle{background:var(--sea-mist);border:1px solid #c4ddd6;border-radius:10px;padding:20px 26px;margin:16px 0}
+.principle b{color:var(--sea-deep)}
+
+/* funnel */
+.funnel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px 28px 20px;margin:20px 0 8px}
+.f-row{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.f-stage{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);width:56px;flex-shrink:0;text-align:right}
+.f-bar-area{flex:1;min-width:0}
+.f-bar{height:34px;border-radius:5px;display:flex;align-items:center;padding:0 12px;color:#fff;font-size:13px;font-weight:500;white-space:nowrap}
+.f-count{font-family:var(--mono);font-weight:500;margin-right:10px}
+.f-note{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);width:130px;flex-shrink:0}
+.f-caption{font-size:12.5px;color:var(--ink-soft);margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+
+/* stage cards */
+.stage{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sea);border-radius:0 10px 10px 0;padding:22px 26px;margin-bottom:16px}
+.stage.pre{border-left-color:#8a95a0}
+.stage.heavy{border-left-color:var(--sea-deep);background:var(--sea-mist)}
+.stage-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.stage-head h3{margin:0;font-size:16px}
+.tag{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:99px;letter-spacing:.04em}
+.tag.cheap{background:var(--sea-mist);color:var(--sea-deep)}
+.stage.heavy .tag.cheap{background:#fff}
+.tag.cost{background:var(--amber-mist);color:var(--amber)}
+.tag.free{background:#eef0ee;color:var(--ink-soft)}
+.stage p{margin-bottom:8px}
+.stage p:last-child{margin-bottom:0}
+
+/* warning block */
+.guard{background:var(--amber-mist);border:1px solid #ecd9b4;border-radius:10px;padding:24px 28px;margin-top:18px}
+.guard-title{font-weight:700;color:var(--amber);font-size:15px;margin-bottom:10px}
+.guard ol{padding-left:1.3em}
+.guard li{margin-bottom:12px}
+.guard li:last-child{margin-bottom:0}
+.guard li b{display:block}
+
+/* fix cards */
+.fix{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--red);border-radius:0 10px 10px 0;padding:18px 24px;margin-bottom:12px}
+.fix b.fix-t{display:block;color:var(--red);font-size:14px;margin-bottom:4px}
+.fix p{margin:0;font-size:13.5px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;font-size:13.5px}
+th{background:var(--ink);color:#fff;text-align:left;padding:10px 16px;font-weight:500;font-size:12.5px;letter-spacing:.04em}
+td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+td.num{font-family:var(--mono);white-space:nowrap}
+tr.total td{background:var(--sea-mist);font-weight:700;color:var(--sea-deep)}
+.vs{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+td .lv{font-family:var(--mono);font-size:11px;padding:1px 8px;border-radius:99px;white-space:nowrap}
+td .lv.full{background:var(--sea-mist);color:var(--sea-deep)}
+td .lv.min{background:var(--amber-mist);color:var(--amber)}
+td .lv.none{background:#eef0ee;color:var(--ink-soft)}
+
+/* orca mapping */
+.orca-item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 24px;margin-bottom:12px;display:grid;grid-template-columns:190px 1fr;gap:18px}
+.orca-item .fn{font-weight:700;font-size:14px;color:var(--sea-deep)}
+.orca-item .fn small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--ink-soft);margin-top:3px;letter-spacing:.03em}
+.orca-item p{margin:0;font-size:13.5px}
+.caution{border-left:4px solid var(--amber)}
+.caution .fn{color:var(--amber)}
+
+/* code */
+pre{background:var(--ink);color:#d8e2dc;border-radius:10px;padding:18px 22px;font-family:var(--mono);font-size:12.5px;line-height:1.75;overflow-x:auto;margin:14px 0}
+pre .k{color:#8fd6c4}
+
+/* checklist */
+.check{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 0;counter-reset:req}
+.check-item{display:flex;gap:14px;padding:13px 24px;border-bottom:1px solid var(--line);font-size:13.5px}
+.check-item:last-child{border-bottom:none}
+.check-item::before{counter-increment:req;content:counter(req,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--sea);flex-shrink:0;padding-top:2px}
+.check-item b{color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding-top:20px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);letter-spacing:.04em}
+
+@media(max-width:640px){
+  .wrap{padding:36px 18px 60px}
+  h1{font-size:24px}
+  .orca-item{grid-template-columns:1fr;gap:6px}
+  .f-note{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="doc-meta">DESIGN DOC v2 — 2026.08.12 / AIハッカソン 提出 8.15 15:00</div>
+  <h1>ドキュメント鮮度監視エージェント<br>設計ドキュメント</h1>
+  <p class="lede">正本（source of truth）の変化を検知し、依存する社内文書の陳腐化・違反の疑いを<strong>根拠付きで</strong>特定するエージェント。本書はコンセプト、機能要件、絞り込みパイプライン、デモ・データ方針までの全決定事項を統合したもの。</p>
+</header>
+
+<nav class="toc">
+  <a href="#s1"><span class="toc-no">§1</span>コンセプト</a>
+  <a href="#s2"><span class="toc-no">§2</span>画面構成</a>
+  <a href="#s3"><span class="toc-no">§3</span>機能スコープ</a>
+  <a href="#s4"><span class="toc-no">§4</span>取り込みとチャンク分割</a>
+  <a href="#s5"><span class="toc-no">§5</span>絞り込みパイプライン</a>
+  <a href="#s6"><span class="toc-no">§6</span>見逃しへの担保</a>
+  <a href="#s7"><span class="toc-no">§7</span>キャッシュと起票</a>
+  <a href="#s8"><span class="toc-no">§8</span>コスト試算</a>
+  <a href="#s9"><span class="toc-no">§9</span>OrcaRouter</a>
+  <a href="#s10"><span class="toc-no">§10</span>デモ・データ方針</a>
+  <a href="#s11"><span class="toc-no">§11</span>要件チェックリスト</a>
+</nav>
+
+<section id="s1">
+  <h2><span class="no">§1</span>コンセプト</h2>
+  <p>社内の課題（設計書の陳腐化、規定の法令違反、営業資料の記載遅れ）はすべて同一構造——<b>「正が変わった → 依存する文書が腐った」</b>——を持つ。本プロダクトはドキュメントチェッカーではなく、<b>正本と派生文書の依存関係を保持し、正本の変化を派生側へ伝播させるエンジン</b>として設計する。参照ソースはユーザーが自由に登録でき、業界を問わず適用できる（デモは労働法令シナリオに絞る）。</p>
+  <div class="principle">
+    <b>設計原則1 — 主語はイベント。</b>一覧の主語はドキュメントではなく「正本の変更イベント」。1つの改正の配下に影響文書がぶら下がる。緊急度は鮮度（最終更新日）ではなく、施行日までの残日数・影響件数・確信度から算出する。<br><br>
+    <b>設計原則2 — 書き込み権限を持たない。</b>修正は「該当箇所のみ書き換えた文書を生成しダウンロード提供 → 人間が置換」。プロダクトは顧客文書への書き込み権限を一切要求しない。PR自動作成は本思想と矛盾するため実装しない。<br><br>
+    <b>設計原則3 — 影響なしも見せる。</b>「精査20件中、要対応3件・影響なし17件」を明示する。何を見て何を見なかったかを隠さないことが信頼の源泉であり、定期監視されている安心感につながる。
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="no">§2</span>画面構成</h2>
+  <table>
+    <tr><th>画面</th><th>主な内容</th></tr>
+    <tr><td>ソース登録</td><td>正本の登録（URL・GitHub等）／監視対象の登録（<b>フォルダ単位・配下を再帰取り込み</b>）／両者の紐付け（手動を基本、初回登録時にAIが候補をサジェスト）／巡回頻度の設定</td></tr>
+    <tr><td>イベント一覧</td><td>「◯◯法改正 8/1 — 精査20件 / 要対応3件 / 影響なし17件」形式。緊急度順ソート</td></tr>
+    <tr><td>イベント詳細</td><td>正本のdiff／影響文書リスト／影響なし判定の一覧（折りたたみ）／このイベントの処理コスト実測値</td></tr>
+    <tr><td>指摘詳細</td><td>該当箇所マーキング／根拠（条文・原文リンク）／修正案／ステータス操作（承認・棄却・検討中）</td></tr>
+    <tr><td>監査ログ</td><td>誰が・いつ・どの改正を根拠に・どう判断したか。「対応不要」判断も記録。根拠となった法令改正をセットで保持</td></tr>
+  </table>
+</section>
+
+<section id="s3">
+  <h2><span class="no">§3</span>機能スコープ</h2>
+  <table>
+    <tr><th style="width:130px">区分</th><th>内容</th></tr>
+    <tr><td><span class="lv full">MUST</span></td><td>ソース登録（正本／監視対象フォルダ／紐付け）・スナップショット保持と差分検知・候補絞り込み（§5）・影響判定と根拠提示・影響なしの明示・ステータス管理（未対応／承認／<b>棄却</b>／検討中）・監視トリガー（巡回頻度設定、初回は分割実行、手動再実行）</td></tr>
+    <tr><td><span class="lv min">SHOULD</span></td><td>修正文書の生成とダウンロード（置換先パスを明記）・監査ログ・コスト実測表示・検出精度の内訳表示</td></tr>
+    <tr><td><span class="lv none">実装しない</span></td><td>PR自動作成（原則2と矛盾）・一括置換・分析ダッシュボード・メール/Slack通知・SSO/権限管理（スライドで言及のみ）・バージョン管理/ロールバック（承認フローで代替）</td></tr>
+    <tr><td><span class="lv none">対応形式</span></td><td><b>md / txt / docx のみ。PDF・pptxは対象外</b>（形式は拡張可能な設計である旨をスライドで言及）。データ担当への「PDF禁止」の明示的な伝達を必須とする</td></tr>
+  </table>
+</section>
+
+<section id="s4">
+  <h2><span class="no">§4</span>取り込みとチャンク分割</h2>
+
+  <h3>登録とファイル検出</h3>
+  <p>監視対象は<b>フォルダ単位で登録</b>し、配下を再帰的に取り込む。巡回時にファイルリストの差分を取り、後から追加されたファイルを検出して取り込む。ファイル名・フォルダ構造は判定に使わない（中身で判定する）。</p>
+
+  <h3>文書種別の自動付与</h3>
+  <p>取り込み時に安価モデルで文書種別（規定／契約書／設計書等）を推定して付与する（1文書1回）。ファイル名と中身の不一致が前提のため、手動登録にはしない。種別は<b>絞り込みではなく優先度付けに使う</b>——種別不明・低確信度のチャンクは除外せず通す（見逃し側に倒す原則）。</p>
+
+  <h3>チャンク分割</h3>
+  <ul class="plain">
+    <li>固定長ではなく<b>文書構造に沿った分割</b>。法令・規定類は条・項単位、md/設計書は見出し（H2/H3）単位、docxは見出しスタイル単位</li>
+    <li>サイズ目安 200〜800トークン。長い条は項で再分割、短い条は無理に結合しない</li>
+    <li><b>表</b>は「直前の見出しに属する1チャンク」として明示的に拾う（別表は改正の影響を受けやすく、分割から漏れやすい）</li>
+    <li><b>前文・附則</b>など条マッチに掛からない残りテキストも捨てずにチャンク化する</li>
+    <li>法令側はe-Gov法令APIで条構造付きXMLを取得できるため、正規表現ではなくXML構造をそのまま分割に使う（仕様は実装前に確認）</li>
+  </ul>
+
+  <h3>チャンクメタデータ</h3>
+  <ul class="plain">
+    <li><b>文書ID + 構造パス</b>（「就業規則 &gt; 第3章 &gt; 第12条」）— UI表示・根拠提示に直結</li>
+    <li><b>文字オフセット</b>（開始・終了）— マーキング表示と修正案の置換位置特定に必要</li>
+    <li><b>文書種別</b>（自動推定・確信度付き）— Stage 1の優先度付けに使用</li>
+    <li><b>本文ハッシュ</b> — キャッシュキー（§7）の材料</li>
+  </ul>
+  <p class="note">埋め込み対象テキストには構造パスを先頭に付与する（「就業規則 第3章 勤務 第12条 …」）。表示用本文と埋め込み用テキストを分けて持つ。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="no">§5</span>候補絞り込みパイプライン</h2>
+  <p class="h2-sub">目的はコスト削減と判定精度の向上を<b>同時に</b>満たすこと。長いコンテキストは判定精度を下げるため、この2つは同じ方向を向く。件数は例。</p>
+
+  <div class="funnel">
+    <div class="f-row">
+      <div class="f-stage">STAGE 0</div>
+      <div class="f-bar-area"><div class="f-bar" style="width:100%;background:#8a95a0"><span class="f-count">差分 1件</span>クエリ化</div></div>
+      <div class="f-note">中位モデル ×1回</div>
+    </div>
+    <div class="f-row">
+      <div class="f-stage">STAGE 1</div>
+      <div class="f-bar-area"><div class="f-bar" style="width:88%;background:var(--sea)"><span class="f-count">3,000 → 50</span>ハイブリッド検索</div></div>
+      <div class="f-note">LLM不使用 / ほぼ¥0</div>
+    </div>
+    <div class="f-row">
+      <div class="f-stage">STAGE 2</div>
+      <div class="f-bar-area"><div class="f-bar" style="width:52%;background:var(--sea)"><span class="f-count">50 → 10</span>再ランク</div></div>
+      <div class="f-note">安価モデル</div>
+    </div>
+    <div class="f-row">
+      <div class="f-stage">STAGE 3</div>
+      <div class="f-bar-area"><div class="f-bar" style="width:26%;background:var(--sea-deep)"><span class="f-count">10 → 3</span>精査</div></div>
+      <div class="f-note">高性能モデル</div>
+    </div>
+    <div class="f-caption">高性能モデルに到達するのは全チャンクの0.3%。ただし「影響なし」と判定した残りも記録・表示する（§6-③）。</div>
+  </div>
+
+  <div class="stage pre">
+    <div class="stage-head"><h3>Stage 0 — 差分の抽出とクエリ化</h3><span class="tag cheap">中位モデル</span><span class="tag free">1イベント1回</span></div>
+    <p>生の差分テキストは検索クエリとして質が悪い（「『努めなければならない』を『しなければならない』に改める」を直接検索しても社内規定に当たらない）。モデルを1回呼び、構造化された「変更の意味」に変換する。出力スキーマ：<b>変更の要旨／影響しうる業務領域／検索キーワード群／施行日</b>。以降の全段階の精度がこの出力に依存する。</p>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><h3>Stage 1 — ハイブリッド検索</h3><span class="tag free">LLM不使用</span></div>
+    <p>事前にインデックス化したチャンクに対し、<b>ベクトル検索＋キーワード検索（BM25等）を併走</b>させスコアを統合する。法令・規定は「第12条」「特定個人情報」等の固有表現の完全一致が効くため、ベクトル単独では取りこぼす。正本↔監視対象の紐付け情報を事前フィルタに使う。</p>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><h3>Stage 2 — 再ランク</h3><span class="tag cheap">安価モデル</span></div>
+    <p>検索は「似ているか」を測るが、必要なのは「影響を受けるか」。同じ法律を引用しているだけの無関係チャンクは検索スコアが高く出る。安価モデル（または専用リランカー）で採点し直す。判定ではなくトリアージ——精度より速度と安さを優先してよい。</p>
+  </div>
+
+  <div class="stage heavy">
+    <div class="stage-head"><h3>Stage 3 — 精査</h3><span class="tag cost">高性能モデル</span></div>
+    <p>唯一コストをかける段階。入力：変更後の条文全文／候補チャンク＋前後文脈／文書メタデータ。出力：<b>影響の有無／根拠／該当箇所の位置／修正案／確信度</b>。低確信度時はより強いモデルへエスカレーション。</p>
+    <p><b>プロンプトに手順を明示する：まず文書の性質と法令の適用可能性を判断し、その後に影響を判定する。</b>判定理由カテゴリに「適用外」を持たせる（例：業務委託・準委任契約に労基法は適用されない。労働時間の記載が濃くても正解は影響なし。テキスト類似度では確実に誤検出する最高難度ケースであり、正しく除外できればデモのハイライトになる）。</p>
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="no">§6</span>見逃し（偽陰性）への担保</h2>
+  <p class="h2-sub">コンプライアンス用途では見逃し1件で製品の信頼が消える。絞り込みは「保証の代替」ではなく「保証の上に乗せる最適化」。過検出（偽陽性）は棄却フローで吸収できるため許容し、見逃しゼロを優先する。</p>
+  <div class="guard">
+    <div class="guard-title">4つの担保 — 要件として必須</div>
+    <ol>
+      <li><b>① 紐付け済み文書は無条件で精査に通す</b>ユーザーが明示的に登録した対応は検索スコアに関係なく必ずStage 3へ。人間の宣言を機械のスコアで上書きしない。</li>
+      <li><b>② 件数固定ではなくスコア閾値を併用する</b>「上位10件」だけだと11件目の本命を落とす。閾値以上は全通し＋上限件数ガードの二段構え。</li>
+      <li><b>③ 絞り込みの過程を可視化する</b>「3,000チャンク中、精査50件・対象外2,950件」を画面表示。何を見なかったかを隠さない。</li>
+      <li><b>④ 定期全件精査をバックストップに持つ</b>日常はイベント駆動で安く、月1回など低頻度で全監視対象を精査する網羅モードを併設。</li>
+    </ol>
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="no">§7</span>キャッシュと起票の分離</h2>
+  <p>判定結果は次のキーでキャッシュする：</p>
+  <pre><span class="k">cache_key</span> = hash( 正本差分 ) × hash( 対象チャンク ) × <span class="k">prompt_version</span></pre>
+  <ul class="plain">
+    <li>巡回して差分がなければコストは完全にゼロ。巡回頻度を上げてもコストは増えない</li>
+    <li><code>prompt_version</code>を含めないと、プロンプト改善後も古い判定が残り続ける</li>
+    <li>同一内容のチャンクは同一キーになるため、<b>設計上、同一内容に異なる判定は出せない</b>（重複ファイルの片方だけ指摘するハルシネーションを構造的に防止）</li>
+  </ul>
+  <div class="principle">
+    <b>判定と起票は別レイヤーに分ける。</b>判定はチャンクハッシュ単位でキャッシュするが、アラートは該当チャンクを含む<b>全ファイルインスタンスに展開して起票</b>する。1対1にすると、同一内容の2ファイルが1件のアラートに畳まれ「片方しか表示しない」事故になる。監査ログはファイル単位で残す必要があるため、この分離は監査要件とも整合する。
+  </div>
+  <p class="note">これとは別レイヤーで、ゲートウェイ側のプロンプトキャッシュも効く（§9）。精査で10候補に繰り返し渡す条文全文の共通部分が乗り、二段キャッシュ構成になる。</p>
+</section>
+
+<section id="s8">
+  <h2><span class="no">§8</span>コスト試算</h2>
+  <p class="h2-sub">前提：監視対象500文書 × 平均8,000トークン（計400万トークン）、高性能モデル入力単価 $3/M。<span class="vs">実測値を画面表示する機能を要件化（数値はモデルで変動）。</span></p>
+  <table>
+    <tr><th>方式</th><th>内訳</th><th style="text-align:right">概算コスト</th></tr>
+    <tr><td>素朴実装<br><span class="vs">全文書を毎回LLMへ</span></td><td>400万トークンを高性能モデルで処理。コンテキスト長大で精度も低い</td><td class="num" style="text-align:right">約 ¥1,800 /イベント</td></tr>
+    <tr><td rowspan="4">多段絞り込み</td><td>Stage 0：クエリ化 ×1回</td><td class="num" style="text-align:right">数円</td></tr>
+    <tr><td>Stage 1：埋め込み検索</td><td class="num" style="text-align:right">ほぼ ¥0</td></tr>
+    <tr><td>Stage 2：50件 × 数百トークン（安価モデル）</td><td class="num" style="text-align:right">¥1 未満</td></tr>
+    <tr><td>Stage 3：10件 × 約4,000トークン（高性能モデル）</td><td class="num" style="text-align:right">約 ¥20</td></tr>
+    <tr class="total"><td colspan="2">多段絞り込み 合計 — 素朴実装比 約1/70</td><td class="num" style="text-align:right">¥20〜30 /イベント</td></tr>
+  </table>
+  <p class="note">画面表示イメージ：「このイベントの処理コスト: ¥23（素朴実装比 1/70）」。審査項目「LLMコスト」の得点源。</p>
+</section>
+
+<section id="s9">
+  <h2><span class="no">§9</span>OrcaRouterの役割分担</h2>
+  <p class="h2-sub">位置づけ：コスト削減の主役は多段絞り込みの設計。OrcaRouterはそれを<b>計測・証明・保護するインフラ</b>。プレゼンでもこの順で語る。</p>
+  <div class="orca-item caution">
+    <div class="fn">ルーティングDSL<small>orcarouter/auto は限定使用</small></div>
+    <p>各段階の難易度は設計時点で確定している。autoに任せると精査が安価モデルに回され見逃しリスクになるため、DSL（YAML + CEL）で「精査→高性能モデル固定、それ以外→最安」とルールを書き、リポジトリでバージョン管理する（「ルーティング方針をコードレビューできる」という本番運用の訴求）。autoの使用はStage 0程度に留める。無料プランでのDSL利用可否は実装前に確認。不可ならAPI呼び出し時のモデル直接指定で代替。</p>
+  </div>
+  <div class="orca-item">
+    <div class="fn">リクエストログ<small>request logs / zero markup</small></div>
+    <p>全呼び出しにモデル・レイテンシ・コストが記録され、上乗せ$0の透明な明細。コスト実測表示機能の実装コストがほぼゼロになる。</p>
+  </div>
+  <div class="orca-item">
+    <div class="fn">プロンプトキャッシュ<small>cached tokens</small></div>
+    <p>キャッシュ済みトークンはプロバイダーのキャッシュ料金で課金。精査時に繰り返す条文全文が乗る。§7の自前キャッシュと二段構成。</p>
+  </div>
+  <div class="orca-item">
+    <div class="fn">ガードレール<small>PII Shield — 最後の防波堤</small></div>
+    <p>PII検出時は課金前にブロック（400）する仕組みで、マスキングして通す仕組みではない。送信前マスキングはアプリ側で実装し、ゲートウェイは多層防御の最終層と位置づける。この構成をセキュリティのスライドにする。</p>
+  </div>
+  <div class="orca-item">
+    <div class="fn">自動フェイルオーバー<small>mid-stream failover</small></div>
+    <p>429/5xxを応答開始前に別モデルへ再試行。「本番で通用する」の体現であり、当日ライブデモの事故保険。</p>
+  </div>
+  <div class="orca-item">
+    <div class="fn">予算・キー管理<small>budget caps</small></div>
+    <p>スコープ付きキーの予算設定で「1イベントあたりのコスト上限ガード」を自前実装せずに済む可能性。無料プラン（Hacker）での利用範囲は要確認。</p>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="no">§10</span>デモ・データ方針</h2>
+
+  <h3>正本 — 実在の法令を使う</h3>
+  <p><b>正本は作らない</b>。法務省・国税庁等の公開データ（e-Gov）を直接参照する。「法律は嘘をつけない」——審査員が根拠リンクを踏むと本物の条文に飛ぶことが、捏造ダミーでは出せない説得力になる。</p>
+
+  <h3>デモ中の「改正」は時間の巻き戻しで起こす</h3>
+  <p>直近に実際にあった労基法関連の改正を1つ選び、<b>スナップショットを改正前の条文で初期化</b>しておく。デモで巡回を実行すると、本物のe-Govとの差分として実在の改正を本当に検知する。検知・判定・根拠のすべてが本物のデータで動く。プレゼンでは「直近の改正を再現している」と正直に言う。<b>どの改正を使うかの選定が、監視対象データ作成の前提となる最優先タスク</b>（監視対象は改正前ルール準拠で書く必要があるため）。</p>
+
+  <h3>領域の優先度と深さの傾斜</h3>
+  <table>
+    <tr><th>領域</th><th>深さ</th><th>役割</th></tr>
+    <tr><td>労働系（労基法）</td><td><span class="lv full">全部盛り</span></td><td>本命。正常系・紛れ文書・重複・雑然フォルダ・正解セットをここに集中。雇用形態バリエーション（雇用契約・業務委託・準委任）を含む</td></tr>
+    <tr><td>個人情報系</td><td><span class="lv min">最小構成</span></td><td>違反2件＋正常2件程度。目的は精度比較ではなく「正本を差し替えるだけで別領域に効く」汎用性の実演</td></tr>
+    <tr><td>金融・商取引系</td><td><span class="lv none">作らない</span></td><td>スライドで拡張先として言及するのみ</td></tr>
+  </table>
+  <p class="note">本番デモに載せるのは、労働系 vs 個人情報系で精度が出たほう。</p>
+
+  <h3>監視対象の作り込みポイント</h3>
+  <ul class="plain">
+    <li>違反文書だけでなく<b>法令通りの正しい文書</b>も用意（「影響なし」の正検知を見せる）</li>
+    <li><b>同一内容ファイルを複数配置</b>し、片方だけ指摘する挙動が出ないことを検証（§7の設計で構造的に保証される——「テストで確認」ではなく「設計上出せない」と言える）</li>
+    <li>直接的な文書だけでなく<b>それらしい記述が紛れた文書</b>（給与規程内の深夜手当の一文等）を混ぜる。文脈で拾えるかが本質＝「AIである必然性」の証明</li>
+    <li><b>フォルダ構造を複数パターン</b>（整理済み／雑然）。ファイル名と中身の不一致も含める——「<code>メモ_final_v2.docx</code>の中身が雇用契約書でも本文で判定するので拾える」は本番デモの1シーンに昇格させる</li>
+    <li><b>業務委託・準委任契約</b>は労基法適用外のため正解は「影響なし（適用外）」。§5 Stage 3の適用可能性判断とセットで最高難度のテストケース</li>
+  </ul>
+
+  <h3>正解セットと精度の見せ方</h3>
+  <ul class="plain">
+    <li>正解表は<b>「ファイル名＋該当条・該当記述＋期待判定（影響あり／なし／適用外）」の3点セット</b>、箇所粒度で作る（製品の主張と同じ粒度でないと数字がズレる）。種別推定の正解も1列追加</li>
+    <li>見せ方は率単体ではなく<b>内訳</b>：「影響あり10件中10件を検出、影響なし15件中14件を正しく除外（1件は過検出）」。母数が小さいため率単体は避け、率を言うなら分母とセット</li>
+    <li><b>見逃しと過検出を分けて報告</b>：「見逃しゼロを優先し、過検出は棄却フローで吸収する設計」と§6と一貫したストーリーで語る</li>
+    <li>本番前に数値を実測し、悪ければ閾値調整してから臨む</li>
+  </ul>
+</section>
+
+<section id="s11">
+  <h2><span class="no">§11</span>要件チェックリスト</h2>
+  <div class="check">
+    <div class="check-item"><span><b>フォルダ単位の登録</b>と再帰取り込み、巡回時の新規ファイル検出</span></div>
+    <div class="check-item"><span><b>文書種別の自動推定</b>（安価モデル・確信度付き）、優先度付けとしての利用（除外に使わない）</span></div>
+    <div class="check-item"><span><b>チャンク分割</b>：構造単位（条・項／見出し）、200〜800トークン、表・前文・附則の取り込み、e-Gov法令APIのXML構造利用</span></div>
+    <div class="check-item"><span><b>チャンクメタデータ</b>：構造パス／文字オフセット／種別／本文ハッシュ、埋め込み用テキストへの構造パス付与</span></div>
+    <div class="check-item"><span><b>差分→クエリ生成</b>の仕様と出力スキーマ（要旨・業務領域・キーワード・施行日）</span></div>
+    <div class="check-item"><span><b>ハイブリッド検索</b>：ベクトル＋キーワード、スコア統合、紐付け情報の事前フィルタ</span></div>
+    <div class="check-item"><span><b>各段階の通過条件</b>：件数上限とスコア閾値の併用</span></div>
+    <div class="check-item"><span><b>Stage 3プロンプト</b>：適用可能性判断→影響判定の手順明示、「適用外」カテゴリ、低確信度エスカレーション</span></div>
+    <div class="check-item"><span><b>見逃し担保4点</b>：紐付け済み無条件通過／閾値併用／過程の可視化／定期全件精査</span></div>
+    <div class="check-item"><span><b>キャッシュキー定義</b>（prompt_version含む）と無効化条件、<b>判定と起票の分離</b>（全ファイルインスタンスへの展開）</span></div>
+    <div class="check-item"><span><b>モデル割り当て</b>：ルーティングDSLで段階固定（無料プランでの可否確認、不可ならモデル直接指定）</span></div>
+    <div class="check-item"><span><b>コスト計測・表示</b>、1イベント上限ガード（OrcaRouter予算機能の利用可否確認）</span></div>
+    <div class="check-item"><span><b>精度評価</b>：箇所粒度の正解セット、見逃し／過検出の分離報告、本番前の実測と閾値調整</span></div>
+    <div class="check-item"><span><b>デモ準備</b>：使用する改正の選定（最優先）、スナップショットの改正前初期化、PDF禁止のデータ担当への明示伝達</span></div>
+  </div>
+</section>
+
+<footer>ドキュメント鮮度監視エージェント / 設計ドキュメント v2 — 2026.08.12</footer>
+
+</div>
+</body>
+</html>

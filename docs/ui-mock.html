@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIモック — ドキュメント鮮度監視エージェント</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFAF7;
+  --card:#FFFFFF;
+  --line:#E6E4DE;
+  --ink:#23282E;
+  --sub:#6B7280;
+  --green:#0E6E63;
+  --green-soft:#E7F1EE;
+  --shu:#B0482B;          /* 朱 — 校正の色。要対応・指摘ハイライト専用 */
+  --shu-soft:#F9EDE8;
+  --amber:#9A6B12;
+  --amber-soft:#F7EFDD;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);color:var(--ink);font-size:14.5px;line-height:1.8}
+a{color:var(--green);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ===== モック用スイッチャー ===== */
+.mock-bar{background:var(--ink);color:#fff;padding:10px 20px;display:flex;gap:8px;align-items:center;font-size:12.5px}
+.mock-bar span{opacity:.7;margin-right:8px;font-family:var(--mono);font-size:11px;letter-spacing:.05em}
+.mock-bar button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:99px;padding:4px 14px;font-size:12.5px}
+.mock-bar button.on{background:#fff;color:var(--ink);border-color:#fff}
+
+/* ===== アプリ枠 ===== */
+.app{display:flex;min-height:calc(100vh - 41px)}
+nav.side{width:196px;flex-shrink:0;border-right:1px solid var(--line);padding:26px 14px;background:var(--card)}
+.brand{font-weight:700;font-size:15px;padding:0 10px 20px;letter-spacing:.02em}
+.brand small{display:block;font-weight:400;font-size:10.5px;color:var(--sub);letter-spacing:.06em;font-family:var(--mono)}
+.side a{display:block;padding:9px 12px;border-radius:8px;color:var(--ink);font-size:13.5px;margin-bottom:2px}
+.side a.on{background:var(--green-soft);color:var(--green);font-weight:700}
+.side a.dim{color:var(--sub)}
+main{flex:1;min-width:0;padding:36px 44px 72px;max-width:980px}
+
+.crumb{font-size:12.5px;color:var(--sub);margin-bottom:18px}
+.crumb b{color:var(--ink);font-weight:500}
+
+/* ===== 共通部品 ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.badge{display:inline-block;font-size:11.5px;padding:2px 10px;border-radius:99px;font-weight:500;white-space:nowrap}
+.badge.shu{background:var(--shu-soft);color:var(--shu)}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.gray{background:#EFEEEA;color:var(--sub)}
+.mono{font-family:var(--mono);font-size:.92em}
+.btn{border-radius:9px;padding:9px 18px;font-size:13.5px;border:1px solid var(--line);background:var(--card)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff;font-weight:500}
+.btn.shu{background:var(--shu);border-color:var(--shu);color:#fff;font-weight:500}
+details{border:1px solid var(--line);border-radius:10px;background:var(--card)}
+details summary{cursor:pointer;padding:12px 18px;font-size:13px;color:var(--sub);list-style:none;display:flex;align-items:center;gap:8px}
+details summary::before{content:"▸";font-size:11px;transition:none}
+details[open] summary::before{content:"▾"}
+details .d-body{padding:4px 18px 18px;border-top:1px dashed var(--line)}
+.reflist{margin-top:12px}
+.ref-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.ref-row:last-child{border-bottom:none}
+.ref-row b{font-weight:500;flex:1}
+.ref-row .n{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap}
+
+/* ===== ホーム ===== */
+.hero{padding:8px 0 26px}
+.hero .when{font-family:var(--mono);font-size:12px;color:var(--sub);margin-bottom:10px}
+.hero h1{font-size:26px;font-weight:700;line-height:1.5;letter-spacing:.01em}
+.hero h1 .n{color:var(--shu)}
+.hero .sub{color:var(--sub);margin-top:6px;font-size:14px}
+.hero .actions{margin-top:18px;display:flex;gap:10px;align-items:center}
+
+.sec-t{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.08em;margin:30px 0 12px}
+.todo{padding:4px 0}
+.todo-item{display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--line)}
+.todo-item:last-child{border-bottom:none}
+.todo-item .doc{flex:1;min-width:0}
+.todo-item .doc b{font-weight:700;font-size:14.5px}
+.todo-item .doc span{display:block;font-size:12.5px;color:var(--sub)}
+.todo-item .go{color:var(--green);font-size:13px;white-space:nowrap}
+
+.hist{padding:4px 0}
+.hist-item{display:flex;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line);font-size:13px;align-items:baseline}
+.hist-item:last-child{border-bottom:none}
+.hist-item .t{font-family:var(--mono);font-size:11.5px;color:var(--sub);width:92px;flex-shrink:0}
+.hist-item .ok{color:var(--sub)}
+
+.rules-grid{display:flex;gap:10px;flex-wrap:wrap}
+.rule-chip{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 16px;font-size:13px}
+.rule-chip small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--sub)}
+
+/* ===== 変更の詳細 ===== */
+.ev-head h1{font-size:21px;font-weight:700;margin-bottom:6px}
+.ev-head .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.diff{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;margin-bottom:10px}
+.diff>div{padding:16px 20px;font-size:13px}
+.diff .before{border-right:1px solid var(--line);background:#FAF7F4}
+.diff .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--sub);margin-bottom:8px}
+.diff del{color:var(--shu);text-decoration-color:var(--shu)}
+.diff ins{color:var(--green);text-decoration:none;font-weight:700}
+.tree{padding:8px 0}
+.tree .folder{padding:8px 20px 2px;font-size:12.5px;color:var(--sub);font-family:var(--mono)}
+.tree-item{display:flex;align-items:center;gap:12px;padding:10px 20px 10px 38px;border-top:1px solid var(--line)}
+.tree-item b{font-weight:500;font-size:13.5px;flex:1}
+.tree-item.hit b{font-weight:700}
+.tree-item.hit{background:linear-gradient(to right,var(--shu-soft),transparent 40%)}
+.funnel-mini{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--sub);flex-wrap:wrap}
+.funnel-mini b{color:var(--ink)}
+.funnel-mini .arr{color:var(--line)}
+
+/* ===== 指摘詳細 ===== */
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+.docview{padding:26px 30px;font-size:13.5px;line-height:2.1}
+.docview h3{font-size:14px;margin-bottom:14px;font-weight:700}
+.docview p{margin-bottom:10px}
+.docview .art{font-weight:700;margin-top:14px}
+mark{background:transparent;border-bottom:3px solid var(--shu);color:inherit;padding-bottom:1px}
+.side-panel .card{padding:18px 22px;margin-bottom:14px}
+.side-panel h4{font-size:12.5px;color:var(--sub);letter-spacing:.06em;margin-bottom:10px;font-weight:700}
+.quote{border-left:3px solid var(--green);padding:6px 14px;font-size:13px;background:var(--green-soft);border-radius:0 8px 8px 0;margin-bottom:8px}
+.fix .b,.fix .a{font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:6px}
+.fix .b{background:#FAF7F4;color:var(--sub);text-decoration:line-through;text-decoration-color:var(--shu)}
+.fix .a{background:var(--green-soft)}
+.status-row{display:flex;gap:8px;flex-wrap:wrap}
+.status-row .btn{flex:1;text-align:center}
+.dl{width:100%;margin-top:10px;text-align:center}
+
+/* ===== イベントグループ（ホーム） ===== */
+.ev-group{margin-bottom:14px;overflow:hidden}
+.ev-group-head{display:flex;align-items:center;gap:12px;padding:14px 20px;background:#F6F4EF;cursor:pointer;user-select:none}
+.ev-group-head .chev{font-size:11px;color:var(--sub);width:14px;flex-shrink:0}
+.ev-group-head b{font-size:14.5px;font-weight:700;color:var(--ink)}
+.ev-group-head .m{display:block;font-size:12px;color:var(--sub);font-weight:400}
+.ev-group-head>div{flex:1;min-width:0}
+.ev-group-head .badges{display:flex;gap:6px;flex-shrink:0}
+.ev-group-head .go{white-space:nowrap;font-size:13px}
+.ev-group .todo{border-top:1px solid var(--line)}
+.ev-group.closed .todo{display:none}
+.ev-group.closed .ev-group-head .chev::before{content:"▸"}
+.ev-group:not(.closed) .ev-group-head .chev::before{content:"▾"}
+
+/* ===== 変更タブ（変更の詳細） ===== */
+.chg-tabs{display:flex;gap:8px;margin:0 0 12px}
+.chg-tabs button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 16px;font-size:13px;color:var(--sub)}
+.chg-tabs button.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:500}
+.chg{display:none}
+.chg.on{display:block}
+
+.screen{display:none}
+.screen.on{display:block}
+@media(max-width:900px){nav.side{display:none}main{padding:24px 18px}.split,.diff{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="mock-bar">
+  <span>UI MOCK v1</span>
+  <button class="on" onclick="show(0,this)">① ホーム</button>
+  <button onclick="show(1,this)">② 変更の詳細</button>
+  <button onclick="show(2,this)">③ 指摘詳細</button>
+</div>
+
+<div class="app">
+<nav class="side">
+  <div class="brand">鮮度監視エージェント<small>DOC FRESHNESS MONITOR</small></div>
+  <a class="on">ホーム</a>
+  <a class="dim">チェック履歴</a>
+  <a class="dim">監査ログ</a>
+  <a class="dim">設定</a>
+</nav>
+
+<main>
+
+<!-- ============ ① ホーム ============ -->
+<section class="screen on" id="s0">
+  <div class="hero">
+    <div class="when">最終チェック: 今日 9:00 ／ 次回: 明日 9:00（毎日自動）</div>
+    <h1><span class="n">2件</span>の法令変更により、<span class="n">4つ</span>のドキュメントで対応が必要です。</h1>
+    <div class="sub">労働基準法施行規則の改正と、労働基準法の条文削除の影響を検知しました。</div>
+    <div class="actions">
+      <button class="btn shu">対応が必要なことを見る</button>
+      <button class="btn">今すぐチェック</button>
+    </div>
+  </div>
+
+  <div class="sec-t">対応が必要なこと</div>
+
+  <div class="card ev-group">
+    <div class="ev-group-head" onclick="this.parentElement.classList.toggle('closed')">
+      <span class="chev"></span>
+      <div><b>労働基準法施行規則 第5条の改正</b><span class="m">2つの変更 ・ 施行済み ・ 今日 9:00 に検知</span></div>
+      <span class="badges"><span class="badge shu">要対応 3</span><span class="badge amber">確認待ち 1</span></span>
+      <a class="go" onclick="event.stopPropagation();show(1,document.querySelectorAll('.mock-bar button')[1])">変更の内容を見る →</a>
+    </div>
+    <div class="todo">
+      <div class="todo-item">
+        <span class="badge shu">要対応</span>
+        <div class="doc"><b>雇用契約書（正社員）.docx</b><span>就業場所の「変更の範囲」の記載がありません</span></div>
+        <a class="go" onclick="show(2,document.querySelectorAll('.mock-bar button')[2])">確認する →</a>
+      </div>
+      <div class="todo-item">
+        <span class="badge shu">要対応</span>
+        <div class="doc"><b>雇用契約書（契約社員）.docx</b><span>契約更新の上限に関する記載がありません</span></div>
+        <a class="go">確認する →</a>
+      </div>
+      <div class="todo-item">
+        <span class="badge shu">要対応</span>
+        <div class="doc"><b>就業規則.docx</b><span>第7条（労働条件の明示）が改正前の内容のままです</span></div>
+        <a class="go">確認する →</a>
+      </div>
+      <div class="todo-item">
+        <span class="badge amber">確認待ち</span>
+        <div class="doc"><b>採用手続きマニュアル.md</b><span>影響の可能性があります。内容の確認をおすすめします</span></div>
+        <a class="go">確認する →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card ev-group closed">
+    <div class="ev-group-head" onclick="this.parentElement.classList.toggle('closed')">
+      <span class="chev"></span>
+      <div><b>労働基準法 第138条の削除</b><span class="m">1つの変更 ・ 施行済み ・ 今日 9:00 に検知</span></div>
+      <span class="badges"><span class="badge shu">要対応 1</span></span>
+      <a class="go" onclick="event.stopPropagation()">変更の内容を見る →</a>
+    </div>
+    <div class="todo">
+      <div class="todo-item">
+        <span class="badge shu">要対応</span>
+        <div class="doc"><b>賃金規程.md</b><span>削除された条文（旧第138条）を参照し続けています</span></div>
+        <a class="go">確認する →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-t">最近のチェック</div>
+  <div class="card hist">
+    <div class="hist-item"><span class="t">今日 9:00</span><span>労働基準法施行規則 — <a onclick="show(1,document.querySelectorAll('.mock-bar button')[1])" style="color:var(--shu);font-weight:700">変更を検知 →</a>（20件を確認し、3件が要対応・16件は問題なし）</span></div>
+    <div class="hist-item"><span class="t">今日 9:00</span><span>労働基準法 — <a style="color:var(--shu);font-weight:700">変更を検知 →</a>（第138条の削除。1件が要対応）</span></div>
+    <div class="hist-item"><span class="t">昨日 9:00</span><span class="ok">労働基準法施行規則 — 変更なし</span></div>
+    <div class="hist-item"><span class="t">昨日 9:00</span><span class="ok">個人情報保護法 — 変更なし</span></div>
+    <div class="hist-item"><span class="t">8/11 9:00</span><span class="ok">すべてのルール — 変更なし</span></div>
+  </div>
+
+  <div class="sec-t">見守り中のルール</div>
+  <div class="rules-grid">
+    <div class="rule-chip">労働基準法<small>e-Gov ／ 毎日 9:00</small></div>
+    <div class="rule-chip">労働基準法施行規則<small>e-Gov ／ 毎日 9:00</small></div>
+    <div class="rule-chip">個人情報保護法<small>e-Gov ／ 毎日 9:00</small></div>
+    <div class="rule-chip" style="border-style:dashed;color:var(--sub)">＋ ルールを追加</div>
+  </div>
+</section>
+
+<!-- ============ ② 変更の詳細 ============ -->
+<section class="screen" id="s1">
+  <div class="crumb">ホーム ／ <b>労働基準法施行規則の改正</b></div>
+  <div class="ev-head">
+    <h1>労働基準法施行規則 第5条の改正</h1>
+    <div class="meta">
+      <span class="badge shu">要対応 3</span>
+      <span class="badge amber">確認待ち 1</span>
+      <span class="badge green">問題なし 16</span>
+      <span class="badge gray">施行日: 2024-04-01（施行済み）</span>
+      <a class="mono" style="font-size:12px">改正の原文を見る（e-Gov）↗</a>
+    </div>
+  </div>
+
+  <div class="sec-t">何が変わったか（2つの変更）</div>
+  <div class="chg-tabs">
+    <button class="on" onclick="showChg(0,this)">変更1: 変更の範囲の明示</button>
+    <button onclick="showChg(1,this)">変更2: 更新上限の明示</button>
+  </div>
+
+  <div class="chg on" id="chg0">
+    <div class="card diff">
+      <div class="before">
+        <div class="label">改正前</div>
+        労働者に対して明示しなければならない労働条件: 就業の場所及び従事すべき業務に関する事項
+      </div>
+      <div>
+        <div class="label">改正後</div>
+        就業の場所及び従事すべき業務<ins>並びにこれらの変更の範囲</ins>に関する事項を明示すること
+      </div>
+    </div>
+    <div class="sec-t">この変更の影響ドキュメント</div>
+    <div class="card tree">
+      <div class="folder">contracts/</div>
+      <div class="tree-item hit"><span class="badge shu">要対応</span><b>雇用契約書（正社員）.docx</b><a class="go" onclick="show(2,document.querySelectorAll('.mock-bar button')[2])">確認する →</a></div>
+      <div class="tree-item"><span class="badge gray">対象外</span><b>業務委託契約書.docx</b><span style="font-size:12px;color:var(--sub)">業務委託のため本改正の対象外</span></div>
+      <div class="folder">rules/</div>
+      <div class="tree-item hit"><span class="badge shu">要対応</span><b>就業規則.docx</b><a class="go">確認する →</a></div>
+      <div class="folder">shared/</div>
+      <div class="tree-item"><span class="badge amber">確認待ち</span><b>採用手続きマニュアル.md</b><a class="go">確認する →</a></div>
+    </div>
+  </div>
+
+  <div class="chg" id="chg1">
+    <div class="card diff">
+      <div class="before">
+        <div class="label">改正前</div>
+        （有期労働契約の更新上限に関する明示義務の定めなし）
+      </div>
+      <div>
+        <div class="label">改正後</div>
+        有期労働契約の締結・更新の際は、<ins>更新上限の有無とその内容</ins>を明示すること
+      </div>
+    </div>
+    <div class="sec-t">この変更の影響ドキュメント</div>
+    <div class="card tree">
+      <div class="folder">contracts/</div>
+      <div class="tree-item hit"><span class="badge shu">要対応</span><b>雇用契約書（契約社員）.docx</b><a class="go">確認する →</a></div>
+      <div class="tree-item"><span class="badge gray">対象外</span><b>業務委託契約書.docx</b><span style="font-size:12px;color:var(--sub)">業務委託のため本改正の対象外</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:10px">
+  <details>
+    <summary>詳細情報（確認の内訳と処理コスト）</summary>
+    <div class="d-body">
+      <p style="font-size:13px;margin:10px 0 8px">全ドキュメントを段階的に絞り込んで確認しています。</p>
+      <div class="funnel-mini">
+        <b>2,847</b>箇所 <span class="arr">→</span> 検索で<b>48</b>件 <span class="arr">→</span> 一次確認で<b>9</b>件 <span class="arr">→</span> 詳細確認の結果 <b style="color:var(--shu)">要対応3</b> ／ 問題なし16 ／ 対象外1
+      </div>
+      <p style="font-size:12.5px;color:var(--sub);margin-top:10px">この変更の処理コスト: <span class="mono">¥23</span>（全文を毎回AIに渡す方式との比較: 約1/70）</p>
+
+      <p style="font-size:13px;margin:16px 0 2px;font-weight:700">確認したドキュメント</p>
+      <p style="font-size:12px;color:var(--sub)">検索で候補に挙がり、内容を実際に確認したドキュメントの一覧です。</p>
+      <div class="reflist">
+        <div class="ref-row"><b>就業規則.docx</b><span class="n">12箇所を確認</span><span class="badge shu">要対応</span></div>
+        <div class="ref-row"><b>雇用契約書（正社員）.docx</b><span class="n">6箇所を確認</span><span class="badge shu">要対応</span></div>
+        <div class="ref-row"><b>雇用契約書（契約社員）.docx</b><span class="n">5箇所を確認</span><span class="badge shu">要対応</span></div>
+        <div class="ref-row"><b>業務委託契約書.docx</b><span class="n">8箇所を確認</span><span class="badge gray">対象外</span></div>
+        <div class="ref-row"><b>採用手続きマニュアル.md</b><span class="n">4箇所を確認</span><span class="badge amber">確認待ち</span></div>
+        <div class="ref-row"><b>賃金規程.md</b><span class="n">3箇所を確認</span><span class="badge green">問題なし</span></div>
+        <div class="ref-row"><b>育児介護休業規程.docx</b><span class="n">2箇所を確認</span><span class="badge green">問題なし</span></div>
+        <div class="ref-row"><b>オンボーディング資料.md</b><span class="n">1箇所を確認</span><span class="badge green">問題なし</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--sub);margin-top:10px">ほか6ドキュメントは、検索の結果この変更との関連が見られなかったため、詳細確認の対象になりませんでした。</p>
+    </div>
+  </details>
+  </div>
+</section>
+
+<!-- ============ ③ 指摘詳細 ============ -->
+<section class="screen" id="s2">
+  <div class="crumb">ホーム ／ 労働基準法施行規則の改正 ・ 変更1 ／ <b>雇用契約書（正社員）.docx</b> <span style="margin-left:10px;font-size:12px"><a>この文書へのほかの指摘はありません</a></span></div>
+  <div class="split">
+    <div class="card docview">
+      <h3>雇用契約書（正社員）.docx</h3>
+      <p class="art">第1条（契約期間）</p>
+      <p>期間の定めなし。</p>
+      <p class="art">第2条（就業の場所）</p>
+      <p><mark>就業の場所は、本社（東京都千代田区…）とする。</mark></p>
+      <p class="art">第3条（従事する業務）</p>
+      <p><mark>従事する業務は、経理事務とする。</mark></p>
+      <p class="art">第4条（労働時間）</p>
+      <p>始業9時00分、終業18時00分とし、休憩は12時から1時間とする。</p>
+    </div>
+    <div class="side-panel">
+      <div class="card">
+        <h4>なぜ対応が必要か</h4>
+        <p style="font-size:13px;margin-bottom:8px">改正後の労基則第5条では、就業場所・業務に加えて<b>「変更の範囲」</b>の明示が必要です。この契約書には記載がありません。</p>
+        <div class="quote">「…並びにこれらの変更の範囲に関する事項」</div>
+        <a class="mono" style="font-size:12px">改正条文の原文（e-Gov）↗</a>
+      </div>
+      <div class="card fix">
+        <h4>修正の提案</h4>
+        <div class="b">就業の場所は、本社（東京都千代田区…）とする。</div>
+        <div class="a">就業の場所は、本社（東京都千代田区…）とする。<b>変更の範囲: 会社の定める事業所（在宅勤務を含む）</b></div>
+      </div>
+      <div class="card">
+        <h4>判断</h4>
+        <div class="status-row">
+          <button class="btn primary">承認する</button>
+          <button class="btn">対応不要</button>
+          <button class="btn">検討中</button>
+        </div>
+        <button class="btn dl">修正版をダウンロード（承認後）</button>
+        <p style="font-size:11.5px;color:var(--sub);margin-top:10px">ファイルの置き換えはご自身で行ってください。置き換え先: <span class="mono">contracts/雇用契約書（正社員）.docx</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+function show(i,btn){
+  document.querySelectorAll('.screen').forEach((s,j)=>s.classList.toggle('on',i===j));
+  document.querySelectorAll('.mock-bar button').forEach(b=>b.classList.toggle('on',b===btn));
+  window.scrollTo(0,0);
+}
+function showChg(i,btn){
+  document.querySelectorAll('.chg').forEach((c,j)=>c.classList.toggle('on',i===j));
+  document.querySelectorAll('.chg-tabs button').forEach(b=>b.classList.toggle('on',b===btn));
+}
+</script>
+</body>
+</html>
