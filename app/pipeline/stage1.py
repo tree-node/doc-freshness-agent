@@ -86,6 +86,7 @@ def search(
             label=index.get(chunk_id).label,
             rrf_score=round(fused.get(chunk_id, (0.0, []))[0], 6),
             reason=reason,
+            linked=index.get(chunk_id).doc_id in linked_doc_ids,
         )
         for chunk_id, reason in selected.items()
     ]

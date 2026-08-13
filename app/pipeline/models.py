@@ -62,6 +62,9 @@ class Candidate:
     label: str
     rrf_score: float
     reason: str  # なぜ通ったか（救済枠・紐付け等）を画面に出すために持つ
+    # 紐付け済み文書か。**表示用の reason とは別に持つ**（見逃し担保①の判定を
+    # 文字列一致に依存させない。検索上位にも入っていると reason が上書きされるため）
+    linked: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

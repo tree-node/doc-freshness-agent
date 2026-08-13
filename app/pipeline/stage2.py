@@ -138,7 +138,8 @@ def rerank(
     passed = [c for c, score in sorted(scored, key=lambda x: -x[1]) if score >= threshold]
 
     # 紐付け済み文書は無条件で Stage 3 に通す（見逃し担保①。スコアに関係なく）
-    linked = [c for c, _ in scored if c.reason == "紐付け済み文書" and c not in passed]
+    # 検索上位にも入っていると reason が「検索上位」になるため、フラグで判定する
+    linked = [c for c, _ in scored if c.linked and c not in passed]
 
     if len(passed) > max_pass:
         notes.append(

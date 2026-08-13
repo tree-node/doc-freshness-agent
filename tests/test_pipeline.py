@@ -261,6 +261,26 @@ def test_stage2_records_cost() -> None:
     assert log.summary()["calls"] == len(candidates)
 
 
+def test_stage2_passes_linked_documents_even_when_scored_low() -> None:
+    """紐付け済み文書はスコアに関係なく Stage 3 へ通す（見逃し担保①）。"""
+    index = make_index()
+    candidates = [
+        Candidate(
+            chunk_id=c.chunk_id,
+            doc_id=c.doc_id,
+            label=c.label,
+            rrf_score=0.1,
+            reason="検索上位",  # 検索でも当たっているため理由は「検索上位」
+            linked=(c.doc_id == "業務委託契約書.md"),
+        )
+        for c in index.chunks
+    ]
+    chat = FakeChat(lambda *_: '{"score": 0.0}')  # すべて足切りされる点数
+    passed, _, _ = stage2.rerank(chat, a_change(), candidates, index, model="m2")
+    assert passed
+    assert {c.doc_id for c in passed} == {"業務委託契約書.md"}
+
+
 def test_stage2_does_not_send_full_law_text() -> None:
     """入力は変更のsummary＋領域＋チャンクのみ（条文全文は渡さない）。"""
     index = make_index()

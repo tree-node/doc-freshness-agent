@@ -151,6 +151,20 @@ def test_linked_documents_pass_regardless_of_score() -> None:
     linked = [c for c in candidates if c.doc_id == "業務委託契約書.md"]
     assert linked
     assert all(c.reason == "紐付け済み文書" for c in linked)
+    assert all(c.linked for c in linked)
+
+
+def test_linked_flag_survives_when_the_document_is_also_a_search_hit() -> None:
+    """紐付け済み文書が検索上位にも入ると、表示用の理由は「検索上位」になる。
+
+    それでも紐付けフラグは立てておかないと、Stage 2 の無条件通過が効かず、
+    見逃し担保①が破れる（スコアが閾値未満で落ちる）。
+    """
+    index = build_index(make_chunks())
+    candidates = search(index, a_change(), linked_doc_ids={"就業規則.md"})
+    hits = [c for c in candidates if c.doc_id == "就業規則.md"]
+    assert any(c.reason == "検索上位" for c in hits)
+    assert all(c.linked for c in hits)
 
 
 def test_delete_type_leans_on_bm25() -> None:
