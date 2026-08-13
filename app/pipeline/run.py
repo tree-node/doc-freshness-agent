@@ -139,6 +139,7 @@ def _process_change(
             chunk.content_hash,
             stage3.PROMPT_VERSION,
             doc_hashes.get(chunk.doc_id, ""),
+            models.stage3,
         )
         cached = cache.get(key) if cache else None
         if cached is not None:

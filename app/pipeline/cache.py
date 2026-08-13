@@ -17,7 +17,11 @@ from typing import Any
 
 
 def cache_key(
-    change_fingerprint: str, chunk_hash: str, prompt_version: str, document_hash: str = ""
+    change_fingerprint: str,
+    chunk_hash: str,
+    prompt_version: str,
+    document_hash: str = "",
+    model: str = "",
 ) -> str:
     """判定1件のキー。
 
@@ -28,8 +32,11 @@ def cache_key(
     後者が要る理由: 「雇用契約書のひな形」と「締結済みの雇用契約書」は休暇条項が同一でも、
     期限の種別が immediate と on_renewal で分かれる。チャンクだけをキーにすると
     先に判定した方の結果が使い回され、必ずどちらかを取り違える。
+
+    `model` も含める。入れないと、モデルを差し替えても前のモデルの判定が返ってきて、
+    **モデル比較が成立しない**（同じ結果しか出ない）。
     """
-    return f"{change_fingerprint}:{chunk_hash}:{document_hash}:{prompt_version}"
+    return f"{change_fingerprint}:{chunk_hash}:{document_hash}:{model}:{prompt_version}"
 
 
 def document_hash(chunk_hashes: list[str]) -> str:

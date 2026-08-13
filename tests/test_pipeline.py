@@ -302,7 +302,7 @@ def test_stage2_limits_parallelism_to_ten() -> None:
 
 def test_stage2_caps_passed_count_and_says_so() -> None:
     chunks = []
-    for i in range(20):
+    for i in range(stage2.MAX_PASS + 5):
         chunks.extend(split_document(f"doc{i}.md", f"# 文書{i}\n第1条 看護休暇の定め。\n"))
     index = build_index(chunks)
     chat = FakeChat(lambda *_: '{"score": 0.9}')
@@ -547,6 +547,14 @@ def test_cache_key_separates_documents_with_identical_clauses() -> None:
     template = cache_key(change.fingerprint, "同じ条文", "v1", document_hash(["a", "b"]))
     signed = cache_key(change.fingerprint, "同じ条文", "v1", document_hash(["a", "c"]))
     assert template != signed
+
+
+def test_cache_key_separates_models() -> None:
+    """モデルを変えたら判定し直す。入れないとモデル比較が成立しない。"""
+    change = a_change()
+    sonnet = cache_key(change.fingerprint, "条文", "v1", "doc", "anthropic/claude-sonnet-5")
+    gemini = cache_key(change.fingerprint, "条文", "v1", "doc", "google/gemini-3.1-pro-preview")
+    assert sonnet != gemini
 
 
 def test_cache_key_is_shared_by_byte_identical_documents() -> None:

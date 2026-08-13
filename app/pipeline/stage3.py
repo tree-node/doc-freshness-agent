@@ -25,6 +25,11 @@ PROMPT_VERSION = "stage3-v2"  # プロンプトを変えたら必ず上げる（
 ESCALATION_THRESHOLD = 0.6
 CONTEXT_CHARS = 300  # 前後文脈の長さ
 
+# 出力の上限。1,500だと饒舌なモデル（推論を長く書くもの）でJSONが途中で切れ、
+# 半数が「JSONとして解釈できません」でフォールバックしていた。モデル比較が
+# 出力の長さで決まってしまうため上限を上げた。
+MAX_OUTPUT_TOKENS = 4000
+
 SYSTEM_PROMPT = f"""あなたは日本の労働法・企業法務に詳しい専門家です。
 法令が改正されたとき、企業の社内文書のどの記述が影響を受けるかを判定します。
 
@@ -268,7 +273,9 @@ def judge_chunk(
                 f"- {p}" for p in problems
             )
         try:
-            result = chat.chat(model=model, system=SYSTEM_PROMPT, user=prompt, max_tokens=1500)
+            result = chat.chat(
+                model=model, system=SYSTEM_PROMPT, user=prompt, max_tokens=MAX_OUTPUT_TOKENS
+            )
         except LLMError as exc:
             return _failed_finding(chunk, f"精査の呼び出しに失敗しました: {exc}", model)
 
@@ -278,7 +285,12 @@ def judge_chunk(
         try:
             payload = parse_json_object(result.text)
         except Exception:
-            problems = ["JSONとして解釈できませんでした。JSONのみを出力してください"]
+            if result.usage.completion_tokens >= MAX_OUTPUT_TOKENS * 0.98:
+                problems = [
+                    "出力が長すぎて途中で切れました。理由と引用を短くし、JSONだけを出力してください"
+                ]
+            else:
+                problems = ["JSONとして解釈できませんでした。JSONのみを出力してください"]
             continue
 
         problems = _validate(payload)
