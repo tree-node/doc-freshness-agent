@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+
+/* UI方針: ライトテーマ / シンプル / 非エンジニアに優しい（DESIGN.md 画面構成） */
+html {
+  color-scheme: light;
+}
