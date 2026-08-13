@@ -88,6 +88,30 @@ def test_bm25_ranks_are_one_based_and_ordered() -> None:
     assert hits == sorted(hits, key=lambda h: -h.score)
 
 
+def test_bm25_keeps_matches_whose_terms_are_common_in_the_corpus() -> None:
+    """頻出語で一致した本命を落とさない。
+
+    BM25のIDFは、その語がコーパスの半数超の文書に現れると負になる。スコアで足切りすると、
+    就業規則ばかりのフォルダで「看護」「労働者」のような語が負になり、
+    本命の一致が丸ごと消える（実際にこれで検索結果が空になった）。
+    """
+    chunks = []
+    for i in range(3):
+        chunks.extend(split_document(f"就業規則{i}.md", f"# 就業規則{i}\n第16条（子の看護休暇）\n看護休暇を取得できる。\n"))
+    chunks.extend(split_document("無関係.md", "# 議事録\n第1条 会議の記録。\n"))
+    index = build_index(chunks)
+
+    scores = index._bm25.get_scores(tokenize("子の看護休暇"))
+    assert min(scores) >= 0, "一致しないチャンクが負にならないこと（順位反転の防止）"
+
+    hits = index.search_bm25("子の看護休暇", top_k=10)
+    assert {index.get(h.chunk_id).doc_id for h in hits} == {
+        "就業規則0.md",
+        "就業規則1.md",
+        "就業規則2.md",
+    }, "一致した3件が返り、一致しない議事録は返らない"
+
+
 def test_vector_search_requires_embeddings() -> None:
     index = build_index(make_chunks())  # embedder なし
     assert not index.has_vectors

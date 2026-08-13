@@ -102,6 +102,24 @@ def test_article_with_branch_number_is_detected() -> None:
     assert chunks[0].structure_path == ("第16条の2（子の看護等休暇）",)
 
 
+def test_heading_with_no_body_is_dropped_when_it_has_children() -> None:
+    """docx の規程で頻出する「見出し行 → すぐ次の条」で空チャンクを作らない。"""
+    text = "## (年次有給休暇)\n第23条 年次有給休暇を与える。\n"
+    chunks = split_document("d.md", text)
+    assert len(chunks) == 1
+    assert chunks[0].structure_path == ("(年次有給休暇)", "第23条")
+    # 見出しの文字列は構造パスとして残っている
+    assert "(年次有給休暇)" in chunks[0].embedding_text
+
+
+def test_heading_with_no_body_is_kept_when_it_has_no_children() -> None:
+    """配下が無ければ捨てない（捨てるとその文字列がどこにも残らない）。"""
+    text = "# 附則\n## 経過措置\n第1条 本文。\n# 別表（準備中）\n"
+    paths = [c.structure_path for c in split_document("d.md", text)]
+    assert ("別表（準備中）",) in paths
+    assert ("附則",) not in paths  # 配下があるので捨てられる
+
+
 def test_headings_nest_by_level() -> None:
     text = "# A\n## B\n本文1\n## C\n本文2\n# D\n本文3\n"
     paths = [c.structure_path for c in split_document("d.md", text)]

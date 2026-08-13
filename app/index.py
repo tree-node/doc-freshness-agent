@@ -11,6 +11,8 @@ DESIGN.md の決定に従う:
 from __future__ import annotations
 
 import json
+import math
+from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -33,6 +35,26 @@ def tokenize(text: str) -> list[str]:
     return tokens
 
 
+def _apply_positive_idf(bm25: BM25Okapi, tokenized: list[list[str]]) -> None:
+    """IDFを必ず正になる式に差し替える（Lucene と同じ形）。
+
+    `rank_bm25` の既定のIDFは、**その語がコーパスの半数超の文書に現れると負になる**。
+    就業規則ばかりを集めたフォルダでは「看護」「労働者」のような語がまさにそれで、
+    一致したチャンクのスコアが負、一致しないチャンクが0となり、**順位が反転する**
+    （一致しない文書が上位に来る）。ライブラリのepsilon補正は平均IDF自体が負だと効かない。
+
+        idf(w) = ln(1 + (N - n + 0.5) / (n + 0.5))     ← n がいくつでも正
+    """
+    n_docs = len(tokenized)
+    df: Counter[str] = Counter()
+    for doc in tokenized:
+        df.update(set(doc))
+    bm25.idf = {
+        word: math.log(1 + (n_docs - freq + 0.5) / (freq + 0.5)) for word, freq in df.items()
+    }
+    bm25.average_idf = (sum(bm25.idf.values()) / len(bm25.idf)) if bm25.idf else 0.0
+
+
 @dataclass(frozen=True)
 class Hit:
     chunk_id: str
@@ -49,7 +71,11 @@ class ChunkIndex:
 
     def __post_init__(self) -> None:
         self._by_id = {chunk.chunk_id: chunk for chunk in self.chunks}
-        self._bm25 = BM25Okapi([tokenize(c.embedding_text) for c in self.chunks]) if self.chunks else None
+        self._bm25 = None
+        if self.chunks:
+            tokenized = [tokenize(c.embedding_text) for c in self.chunks]
+            self._bm25 = BM25Okapi(tokenized)
+            _apply_positive_idf(self._bm25, tokenized)
         if self.embeddings is not None and len(self.embeddings) != len(self.chunks):
             raise ValueError("埋め込みの件数がチャンク数と一致しません")
 
@@ -66,10 +92,16 @@ class ChunkIndex:
     # --- 検索 ---------------------------------------------------------------
 
     def search_bm25(self, query: str, top_k: int) -> list[Hit]:
+        """BM25で上位を返す。
+
+        落とすのは**クエリ語が1つも出てこないチャンクだけ**（スコア0）。IDFを正に揃えて
+        あるので、語が1つでも一致すれば必ず0より大きくなる。
+        スコアの大小による足切りはしない——閾値の判断は Stage 2 に集約する（DESIGN.md Stage 1）。
+        """
         if not self._bm25 or not query.strip():
             return []
-        scores = self._bm25.get_scores(tokenize(query))
-        return self._rank(np.asarray(scores), top_k, drop_zero=True)
+        scores = np.asarray(self._bm25.get_scores(tokenize(query)))
+        return [hit for hit in self._rank(scores, top_k) if hit.score > 0]
 
     def search_vector(self, query_vector: list[float], top_k: int) -> list[Hit]:
         if not self.has_vectors:
@@ -79,17 +111,14 @@ class ChunkIndex:
         if norm == 0:
             return []
         scores = self.embeddings @ (query / norm)  # 保存時に正規化済み
-        return self._rank(scores, top_k, drop_zero=False)
+        return self._rank(scores, top_k)
 
-    def _rank(self, scores: np.ndarray, top_k: int, drop_zero: bool) -> list[Hit]:
+    def _rank(self, scores: np.ndarray, top_k: int) -> list[Hit]:
         order = np.argsort(-scores)[: max(top_k, 0)]
-        hits = []
-        for rank, idx in enumerate(order, start=1):
-            score = float(scores[idx])
-            if drop_zero and score <= 0:
-                continue
-            hits.append(Hit(chunk_id=self.chunks[idx].chunk_id, score=score, rank=rank))
-        return hits
+        return [
+            Hit(chunk_id=self.chunks[idx].chunk_id, score=float(scores[idx]), rank=rank)
+            for rank, idx in enumerate(order, start=1)
+        ]
 
     # --- 保存・読み込み -------------------------------------------------------
 

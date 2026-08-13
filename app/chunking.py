@@ -86,6 +86,12 @@ class _Block:
     kind: ChunkKind
     path: tuple[str, ...]
     lines: list[tuple[str, int, int]]  # (行テキスト, start, end)
+    # 見出し行から始まったか。見出しだけで本文が続かないブロックを捨てる判定に使う
+    from_heading: bool = False
+
+    @property
+    def is_heading_only(self) -> bool:
+        return self.from_heading and len(self.lines) == 1
 
     @property
     def start(self) -> int:
@@ -138,6 +144,31 @@ def _split_long(block: _Block) -> list[_Block]:
     return [_Block(kind=block.kind, path=block.path, lines=lines) for lines in groups if lines]
 
 
+def _drop_empty_headings(blocks: list[_Block]) -> list[_Block]:
+    """本文が続かない見出し行だけのブロックを、配下がある場合に限って捨てる。
+
+    「## (年次有給休暇)」の直後に「第23条 …」が来る構造（docx の規程で頻出）では、
+    見出しだけのチャンクが大量にできる。実データで全チャンクの約半分がこれになり、
+    Stage 2 のコストを倍にしたうえ、確信度0.5〜0.6の「要確認」ノイズを生んでいた。
+
+    **配下を持たない見出しは捨てない**。捨てるとその文字列がどこにも残らないため
+    （配下があれば構造パスとして必ず残る）。
+    """
+    kept: list[_Block] = []
+    for block in blocks:
+        if block.is_heading_only:
+            has_children = any(
+                other is not block
+                and len(other.path) > len(block.path)
+                and other.path[: len(block.path)] == block.path
+                for other in blocks
+            )
+            if has_children:
+                continue
+        kept.append(block)
+    return kept
+
+
 def split_document(doc_id: str, text: str) -> list[Chunk]:
     """文書テキストをチャンクに分割する。"""
     blocks: list[_Block] = []
@@ -162,7 +193,9 @@ def split_document(doc_id: str, text: str) -> list[Chunk]:
                 path_stack.pop()
             path_stack.append((level, title))
             kind: ChunkKind = "article" if level == ARTICLE_LEVEL else "text"
-            current = _Block(kind=kind, path=current_path(), lines=[(line, start, end)])
+            current = _Block(
+                kind=kind, path=current_path(), lines=[(line, start, end)], from_heading=True
+            )
             continue
 
         is_table_line = bool(TABLE_LINE_RE.match(line.strip()))
@@ -182,7 +215,7 @@ def split_document(doc_id: str, text: str) -> list[Chunk]:
     flush()
 
     chunks: list[Chunk] = []
-    for block in blocks:
+    for block in _drop_empty_headings(blocks):
         for piece in _split_long(block):
             body = piece.text()
             if not body:
