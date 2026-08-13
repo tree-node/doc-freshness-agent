@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
 import httpx
@@ -36,14 +36,19 @@ class LLMError(RuntimeError):
 
 @dataclass(frozen=True)
 class Usage:
-    model: str
+    model: str  # 実際に処理したモデル（フェイルオーバーで変わる）
     prompt_tokens: int = 0
     completion_tokens: int = 0
-    cost_usd: float | None = None  # ゲートウェイが返す場合のみ
+    cost_usd: float | None = None
+    requested_model: str | None = None  # こちらが指定したモデル。**単価の引き当てはこちら**
 
     @property
     def total_tokens(self) -> int:
         return self.prompt_tokens + self.completion_tokens
+
+    @property
+    def price_key(self) -> str:
+        return self.requested_model or self.model
 
 
 @dataclass
@@ -57,8 +62,13 @@ class CostLog:
     """イベント単位のコスト実測（DESIGN.md コスト設計）。"""
 
     entries: list[Usage] = field(default_factory=list)
+    prices: Any | None = None  # PriceTable。無ければトークン数だけ記録する
 
     def add(self, usage: Usage) -> None:
+        if usage.cost_usd is None and self.prices is not None:
+            cost = self.prices.cost(usage.price_key, usage.prompt_tokens, usage.completion_tokens)
+            if cost is not None:
+                usage = replace(usage, cost_usd=cost)
         self.entries.append(usage)
 
     @property
@@ -69,7 +79,8 @@ class CostLog:
         by_model: dict[str, dict[str, Any]] = {}
         for usage in self.entries:
             row = by_model.setdefault(
-                usage.model, {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0}
+                usage.price_key,
+                {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0},
             )
             row["calls"] += 1
             row["prompt_tokens"] += usage.prompt_tokens
@@ -188,6 +199,7 @@ class OrcaRouterClient:
             text=text,
             usage=Usage(
                 model=data.get("model", model),
+                requested_model=model,
                 prompt_tokens=usage.get("prompt_tokens", 0),
                 completion_tokens=usage.get("completion_tokens", 0),
                 cost_usd=usage.get("cost"),
