@@ -115,3 +115,16 @@ export function formatCostJpy(costUsd) {
   const ratio = yen > 0 ? Math.max(1, Math.round(NAIVE_COST_JPY / yen)) : null;
   return { yen, ratioLabel: ratio ? `約1/${ratio}` : null };
 }
+
+/** ISO日時を「今日 9:00」「昨日 9:00」「8/13 9:00」のように短く出す。 */
+export function formatCheckedAt(iso, now = new Date()) {
+  if (!iso) return '';
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return iso;
+  const time = `${at.getHours()}:${String(at.getMinutes()).padStart(2, '0')}`;
+  if (at.toDateString() === now.toDateString()) return `今日 ${time}`;
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (at.toDateString() === yesterday.toDateString()) return `昨日 ${time}`;
+  return `${at.getMonth() + 1}/${at.getDate()} ${time}`;
+}

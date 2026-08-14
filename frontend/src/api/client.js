@@ -1,27 +1,58 @@
 /**
- * データ取得口。今は fixture (src/mock/*.json) を返すが、本物のAPIができたら
- * この3関数の中身だけを `fetch('/api/...')` に差し替えれば済む形にしてある。
- * コンポーネント側は PIPELINE_RESULTS / fixture の存在を知らない。
+ * データ取得口。ここだけがバックエンドを知っている。
+ *
+ * バックエンドは PipelineResult（パイプラインの出力）をそのまま返すので、
+ * 画面用の整形は derive.js に置いたまま変わらない。
+ *
+ * APIに繋がらないときは fixture（src/mock/*.json）にフォールバックする。
+ * デモ当日にバックエンドが落ちても画面が真っ白にならないようにするため。
  */
 import { PIPELINE_RESULTS } from './fixtures.js';
 import { buildEventSummary, findFindingDetail } from './derive.js';
+import { formatCheckedAt } from './format.js';
 
-// 検知時刻はイベントJSONに含まれない（PipelineResult に detected_at フィールドが無い）ため、
-// デモ用の表示ラベルをここで補う。チェック履歴・見守り中ルールもここで組み立てる
-// ダミー（fixture に無いものの組み立ては指示どおりデータ層内に閉じる）。
-const DETECTED_AT_LABEL = '今日 9:00';
+/** APIが落ちている／未起動のときに fixture を使ったかどうか。画面に出す用。 */
+export const dataSource = { usingFallback: false, reason: null };
 
-/** @returns {Promise<ReturnType<typeof buildEventSummary>[]>} ホームで使うイベント一覧 */
+async function getJson(path) {
+  const res = await fetch(path, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+/** APIを試し、駄目なら fixture を返す。 */
+async function withFallback(path, fallback, { allow404 = false } = {}) {
+  try {
+    const value = await getJson(path);
+    dataSource.usingFallback = false;
+    dataSource.reason = null;
+    return value;
+  } catch (error) {
+    if (allow404 && String(error.message).includes('404')) throw error;
+    dataSource.usingFallback = true;
+    dataSource.reason = error.message;
+    return fallback();
+  }
+}
+
+/** イベントの生JSON一覧。API優先、駄目なら fixture。 */
+async function loadResults() {
+  const body = await withFallback('/api/events', () => ({ events: PIPELINE_RESULTS }));
+  return body.events ?? [];
+}
+
+/** ホームで使うイベント一覧。 */
 export async function fetchEvents() {
-  const summaries = PIPELINE_RESULTS.map((r) => buildEventSummary(r, { detectedAtLabel: DETECTED_AT_LABEL }));
-  return summaries;
+  const results = await loadResults();
+  return results.map((r) => buildEventSummary(r));
 }
 
 /** @param {string} eventId */
 export async function fetchEvent(eventId) {
-  const raw = PIPELINE_RESULTS.find((r) => r.law_id === eventId);
+  const results = await loadResults();
+  const raw = results.find((r) => r.law_id === eventId);
   if (!raw) return null;
-  return { summary: buildEventSummary(raw, { detectedAtLabel: DETECTED_AT_LABEL }), raw };
+  return { summary: buildEventSummary(raw), raw };
 }
 
 /**
@@ -30,33 +61,53 @@ export async function fetchEvent(eventId) {
  * @param {string} chunkId
  */
 export async function fetchFinding(eventId, changeId, chunkId) {
-  const raw = PIPELINE_RESULTS.find((r) => r.law_id === eventId);
+  const results = await loadResults();
+  const raw = results.find((r) => r.law_id === eventId);
   if (!raw) return null;
   const detail = findFindingDetail(raw, changeId, chunkId);
   if (!detail) return null;
   return { ...detail, pipelineResult: raw };
 }
 
-/** 最近のチェック履歴（「変更なし」も含む）。fixtureに無い巡回履歴はここでダミーとして組み立てる。 */
+/**
+ * 最近のチェック履歴。**変更が無かったチェックも含む**（DESIGN.md 原則3）。
+ * APIが無いときは、検知したイベントぶんだけを履歴として組み立てる。
+ */
 export async function fetchHistory() {
+  const body = await withFallback('/api/history', () => null);
+  if (body?.history) {
+    return body.history.map((h) => ({
+      kind: h.detected ? 'detected' : 'no_change',
+      timeLabel: formatCheckedAt(h.checked_at),
+      lawTitle: h.law_title,
+      eventId: h.law_id,
+      summaryLabel: h.summary
+        ? `${h.summary.judged}件を確認し、${h.summary.affected}件が要対応・${h.summary.not_affected}件は問題なし`
+        : null,
+    }));
+  }
+
   const events = await fetchEvents();
-  const detected = events.map((e) => ({
+  return events.map((e) => ({
     kind: 'detected',
-    timeLabel: DETECTED_AT_LABEL,
+    timeLabel: e.detectedAtLabel,
     lawTitle: e.lawTitle,
     eventId: e.eventId,
-    summaryLabel: `${e.counts.affected + e.counts.needsReview + e.counts.notApplicable + e.counts.none}件を確認し、${e.counts.affected}件が要対応・${e.counts.notApplicable + e.counts.none}件は問題なし`,
+    summaryLabel: `${e.counts.affected + e.counts.needsReview + e.counts.notApplicable + e.counts.none}件を確認し、${e.counts.affected}件が要対応`,
   }));
-  const noChange = [
-    { kind: 'no_change', timeLabel: '昨日 9:00', lawTitle: '個人情報保護法' },
-    { kind: 'no_change', timeLabel: '8/11 9:00', lawTitle: 'すべてのルール' },
-  ];
-  return [...detected, ...noChange];
 }
 
-/** 見守り中のルール一覧。実イベントの法令に加え、変更が無かった監視対象もダミーで1件添える。 */
+/** 見守り中のルール（登録済みの正本）。 */
 export async function fetchRules() {
+  const body = await withFallback('/api/rules', () => null);
+  if (body?.rules) {
+    return body.rules.map((r) => ({
+      lawTitle: r.law_title,
+      source: r.source ?? 'e-Gov',
+      schedule: r.last_fetched_at ? `最終チェック ${formatCheckedAt(r.last_fetched_at)}` : '未チェック',
+    }));
+  }
+
   const events = await fetchEvents();
-  const fromEvents = events.map((e) => ({ lawTitle: e.lawTitle, source: 'e-Gov', schedule: '毎日 9:00' }));
-  return [...fromEvents, { lawTitle: '個人情報保護法', source: 'e-Gov', schedule: '毎日 9:00' }];
+  return events.map((e) => ({ lawTitle: e.lawTitle, source: 'e-Gov', schedule: '毎日 9:00' }));
 }

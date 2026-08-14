@@ -14,6 +14,7 @@ import {
   splitDocPath,
   truncate,
   withDisambiguatedNames,
+  formatCheckedAt,
 } from './format.js';
 
 /** 法令名が長いので画面表示用の略称を用意する（実データの言い換えであり、内容の創作ではない）。 */
@@ -155,7 +156,8 @@ export function buildEventSummary(pipelineResult, meta) {
     shortDescription: eventShortDescription(pipelineResult),
     changesCount: pipelineResult.changes.length,
     enforcement,
-    detectedAtLabel: meta?.detectedAtLabel ?? '',
+    // 検知時刻は PipelineResult.detected_at から作る（呼び出し側が渡す必要はない）
+    detectedAtLabel: meta?.detectedAtLabel ?? formatCheckedAt(pipelineResult.detected_at),
     counts,
     actionDocs,
     raw: pipelineResult,

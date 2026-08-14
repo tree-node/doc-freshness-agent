@@ -75,3 +75,5 @@ Thumbs.db
 # Claude Code ローカル設定（共有しない個人設定のみ）
 # ============================================
 .claude/settings.local.json
+data/results/
+data/history.jsonl

@@ -58,6 +58,7 @@ def run_pipeline(
         from_revision=event.from_revision,
         to_revision=event.to_revision,
         enforcement_date=event.enforcement_date,
+        detected_at=event.detected_at,
     )
 
     def report(message: str) -> None:

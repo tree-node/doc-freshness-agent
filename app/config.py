@@ -44,6 +44,8 @@ class Settings:
     watch_root: Path
     db_path: Path
     snapshots_dir: Path
+    results_dir: Path  # 検知結果のJSON置き場。APIはここを読む
+    history_path: Path  # チェック履歴（変更なしも記録する）
 
     @classmethod
     def load(cls) -> "Settings":
@@ -61,6 +63,8 @@ class Settings:
             watch_root=_path_from_env("WATCH_ROOT", "./demo-data"),
             db_path=_path_from_env("DB_PATH", "./data/app.sqlite"),
             snapshots_dir=_path_from_env("SNAPSHOTS_DIR", "./data/snapshots"),
+            results_dir=_path_from_env("RESULTS_DIR", "./data/results"),
+            history_path=_path_from_env("HISTORY_PATH", "./data/history.jsonl"),
         )
 
     def require(self, field: str) -> str:

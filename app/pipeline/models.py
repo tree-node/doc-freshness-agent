@@ -168,6 +168,7 @@ class PipelineResult:
     from_revision: str
     to_revision: str
     enforcement_date: str | None
+    detected_at: str | None = None  # いつ検知したか。画面の「◯◯に検知」に使う
     results: list[ChangeResult] = field(default_factory=list)
     alerts: list[Alert] = field(default_factory=list)
     cost: dict[str, Any] = field(default_factory=dict)
@@ -179,6 +180,7 @@ class PipelineResult:
             "from_revision": self.from_revision,
             "to_revision": self.to_revision,
             "enforcement_date": self.enforcement_date,
+            "detected_at": self.detected_at,
             "changes": [r.to_dict() for r in self.results],
             "alerts": [a.to_dict() for a in self.alerts],
             "cost": self.cost,
