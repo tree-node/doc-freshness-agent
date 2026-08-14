@@ -17,7 +17,9 @@ def test_defaults_when_env_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     loaded = Settings.load()
     assert loaded.orcarouter_api_key is None
     assert loaded.model_stage3 is None
-    assert loaded.watch_root == (REPO_ROOT / "demo-data").resolve()
+    # 監視対象は demo-data の直下ではなく「監視対象」フォルダ。
+    # 答え合わせ（正解表）や原本を取り込ませないため（demo-data/README.md 参照）
+    assert loaded.watch_root == (REPO_ROOT / "demo-data/監視対象").resolve()
     assert loaded.db_path == (REPO_ROOT / "data/app.sqlite").resolve()
 
 
