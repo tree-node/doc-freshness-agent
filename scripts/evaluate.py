@@ -72,12 +72,21 @@ class Finding:
 class Report:
     detected: list[tuple[Expected, Finding]] = field(default_factory=list)
     missed: list[Expected] = field(default_factory=list)
-    over: list[Finding] = field(default_factory=list)
+    # 「影響なし」を期待した行のうち、誤って指摘されたもの（行単位）
+    wrongly_flagged_rows: list[Expected] = field(default_factory=list)
+    # 上記の行に付いた指摘（1行に複数付くことがあるので、分母には使わない）
+    wrongly_flagged: list[Finding] = field(default_factory=list)
+    # 正解表のどの行にも当たらない箇所への指摘
+    unexpected: list[Finding] = field(default_factory=list)
     correctly_excluded: list[Expected] = field(default_factory=list)
     wrong_deadline: list[tuple[Expected, Finding]] = field(default_factory=list)
     out_of_scope: list[Expected] = field(default_factory=list)
     cost_usd: float = 0.0
     stage3_judged: int = 0
+
+    @property
+    def over(self) -> list[Finding]:
+        return [*self.wrongly_flagged, *self.unexpected]
 
 
 def load_truth(path: Path) -> list[Expected]:
@@ -155,14 +164,15 @@ def evaluate(truth: list[Expected], findings: list[Finding]) -> Report:
         else:
             if hits:
                 claimed.update(i for i, _ in hits)
-                report.over.extend(f for _, f in hits)
+                report.wrongly_flagged_rows.append(expected)
+                report.wrongly_flagged.extend(f for _, f in hits)
             else:
                 report.correctly_excluded.append(expected)
 
     # どの期待にも当たらなかった「影響あり」も過検出
     for index, finding in enumerate(flagged):
         if index not in claimed:
-            report.over.append(finding)
+            report.unexpected.append(finding)
 
     return report
 
@@ -170,13 +180,19 @@ def evaluate(truth: list[Expected], findings: list[Finding]) -> Report:
 def print_report(report: Report) -> None:
     detected, missed = len(report.detected), len(report.missed)
     target = detected + missed
-    excluded, over = len(report.correctly_excluded), len(report.over)
+    excluded = len(report.correctly_excluded)
+    wrongly = len(report.wrongly_flagged_rows)  # 分母がぶれないよう行で数える
+    unexpected = len(report.unexpected)
 
     print("=" * 72)
     print("精度")
     print("=" * 72)
     print(f"  影響あり {target} 件中 {detected} 件を検出（見逃し {missed} 件）")
-    print(f"  影響なし {excluded + over} 件中 {excluded} 件を正しく除外（過検出 {over} 件）")
+    print(
+        f"  影響なし {excluded + wrongly} 件中 {excluded} 件を正しく除外"
+        f"（誤って指摘 {wrongly} 件）"
+    )
+    print(f"  正解表に無い箇所への指摘: {unexpected} 件")
     if report.out_of_scope:
         print(f"  ※ 集計対象外 {len(report.out_of_scope)} 件（改正イベントに紐づかないため検知対象ではない）")
 
@@ -233,7 +249,8 @@ def main(argv: list[str] | None = None) -> int:
                     "detected": len(report.detected),
                     "missed": len(report.missed),
                     "correctly_excluded": len(report.correctly_excluded),
-                    "over_detected": len(report.over),
+                    "wrongly_flagged": len(report.wrongly_flagged),
+                    "unexpected": len(report.unexpected),
                     "wrong_deadline": len(report.wrong_deadline),
                     "out_of_scope": len(report.out_of_scope),
                     "cost_usd": report.cost_usd,

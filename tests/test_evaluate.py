@@ -62,6 +62,21 @@ def test_flagging_a_compliant_document_is_a_false_positive() -> None:
     assert not report.correctly_excluded
 
 
+def test_multiple_findings_on_one_row_count_as_one_row() -> None:
+    """分母がぶれないよう、誤指摘は行で数える（1行に何件付いても1行）。"""
+    clean = expected(doc_id="対応済み.docx", location="—", impact="none", deadline="none")
+    report = evaluate(
+        [clean],
+        [
+            finding(doc_id="対応済み.docx", label="A > 第1条"),
+            finding(doc_id="対応済み.docx", label="B > 第2条"),
+            finding(doc_id="対応済み.docx", label="C > 第3条"),
+        ],
+    )
+    assert len(report.wrongly_flagged_rows) == 1
+    assert len(report.wrongly_flagged) == 3
+
+
 def test_not_flagging_a_compliant_document_is_a_true_negative() -> None:
     clean = expected(doc_id="対応済み.docx", location="—", impact="none", deadline="none")
     report = evaluate([clean], [])
