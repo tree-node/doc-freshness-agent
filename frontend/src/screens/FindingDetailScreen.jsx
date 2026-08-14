@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumb.jsx';
-import { fetchEvent, fetchFinding, splitDocPath, truncate } from '../api/index.js';
+import { downloadRevisedDocument, fetchEvent, fetchFinding, splitDocPath, truncate } from '../api/index.js';
 
 const STATUSES = [
   { key: 'approved', label: '承認する' },
@@ -12,13 +12,32 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
   const [event, setEvent] = useState(null);
   const [detail, setDetail] = useState(null);
   const [status, setStatus] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
 
   useEffect(() => {
     setDetail(null);
     setStatus(null);
+    setDownloadError(null);
     fetchEvent(eventId).then(setEvent);
     fetchFinding(eventId, changeId, chunkId).then(setDetail);
   }, [eventId, changeId, chunkId]);
+
+  /**
+   * 修正版ファイルを受け取る。作るのはサーバー側で、元のファイルには触らない。
+   * 当てられなかった場合はサーバーが 422 を返すので、成功したふりをせずに理由を出す。
+   */
+  async function handleDownload() {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      await downloadRevisedDocument(eventId, detail.finding.doc_id);
+    } catch (error) {
+      setDownloadError(error.message);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   if (!event || !detail) return <p className="text-sm text-[var(--sub)]">読み込み中…</p>;
 
@@ -117,11 +136,15 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
             </div>
             <button
               type="button"
-              disabled={status !== 'approved' || !finding.fix_proposal}
+              disabled={status !== 'approved' || !finding.fix_proposal || downloading}
+              onClick={handleDownload}
               className="mt-2.5 w-full rounded-[9px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-2.25 text-center text-[13.5px] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              修正版をダウンロード（承認後）
+              {downloading ? '作成中…' : '修正版をダウンロード（承認後）'}
             </button>
+            {downloadError && (
+              <p className="mt-2 text-[12px] text-[var(--shu)]">{downloadError}</p>
+            )}
             <p className="mt-2.5 text-[11.5px] text-[var(--sub)]">
               ファイルの置き換えはご自身で行ってください。置き換え先: <span className="font-mono">{finding.doc_id}</span>
             </p>

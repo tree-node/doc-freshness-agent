@@ -46,6 +46,7 @@ class Settings:
     snapshots_dir: Path
     results_dir: Path  # 検知結果のJSON置き場。APIはここを読む
     history_path: Path  # チェック履歴（変更なしも記録する）
+    outputs_dir: Path  # 生成した修正版ファイルの置き場（元のファイルとは別の場所）
 
     @classmethod
     def load(cls) -> "Settings":
@@ -60,11 +61,12 @@ class Settings:
             embeddings_api_key=os.getenv("EMBEDDINGS_API_KEY") or None,
             embeddings_model=os.getenv("EMBEDDINGS_MODEL") or None,
             github_token=os.getenv("GITHUB_TOKEN") or None,
-            watch_root=_path_from_env("WATCH_ROOT", "./demo-data"),
+            watch_root=_path_from_env("WATCH_ROOT", "./demo-data/監視対象"),
             db_path=_path_from_env("DB_PATH", "./data/app.sqlite"),
             snapshots_dir=_path_from_env("SNAPSHOTS_DIR", "./data/snapshots"),
             results_dir=_path_from_env("RESULTS_DIR", "./data/results"),
             history_path=_path_from_env("HISTORY_PATH", "./data/history.jsonl"),
+            outputs_dir=_path_from_env("OUTPUTS_DIR", "./data/outputs"),
         )
 
     def require(self, field: str) -> str:

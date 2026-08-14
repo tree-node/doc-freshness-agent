@@ -111,3 +111,30 @@ export async function fetchRules() {
   const events = await fetchEvents();
   return events.map((e) => ({ lawTitle: e.lawTitle, source: 'e-Gov', schedule: '毎日 9:00' }));
 }
+
+/**
+ * 修正版ファイルを受け取る。作るのはサーバー側で、元のファイルには触らない。
+ * 当てられなかったときはサーバーが 422 を返すので、成功したふりをせず理由を投げる。
+ */
+export async function downloadRevisedDocument(eventId, docId) {
+  const url = `/api/events/${encodeURIComponent(eventId)}/revised?doc_id=${encodeURIComponent(docId)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      detail = (await res.json()).detail ?? detail;
+    } catch {
+      /* JSONで返ってこない場合はステータスだけ出す */
+    }
+    throw new Error(`修正版を作れませんでした: ${detail}`);
+  }
+
+  const blob = await res.blob();
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = docId.split('/').pop();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+}

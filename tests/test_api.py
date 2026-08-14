@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from urllib.parse import unquote
 
 import pytest
 from fastapi.testclient import TestClient
@@ -162,6 +163,78 @@ def test_history_survives_a_broken_line(history_path: Path) -> None:
     with history_path.open("a", encoding="utf-8") as handle:
         handle.write("これはJSONではない\n")
     assert len(load_checks(history_path)) == 1
+
+
+# --- 修正版ファイルのダウンロード ---------------------------------------------
+
+
+def a_result_with_fix(doc_id="規程.md"):
+    result = a_result()
+    result["alerts"] = [
+        {
+            "doc_id": doc_id,
+            "location": f"/watch/{doc_id}",
+            "chunk_id": f"{doc_id}#1",
+            "change_id": "chg-001",
+            "finding": {
+                "impact": "affected",
+                "evidence_location": "第21条",
+                "fix_proposal": {"before": "小学校就学の始期に達するまで", "after": "小学校第三学年修了前"},
+            },
+        }
+    ]
+    return result
+
+
+@pytest.fixture
+def watch_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    directory = tmp_path / "watch"
+    directory.mkdir()
+    monkeypatch.setattr(api, "watch_root", lambda: directory)
+    monkeypatch.setattr(api, "outputs_dir", lambda: tmp_path / "outputs")
+    return directory
+
+
+def test_downloads_a_revised_document(results_dir: Path, watch_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_fix())
+    original = "第21条 小学校就学の始期に達するまでの子を養育する従業員は、看護休暇を取得できる。"
+    (watch_dir / "規程.md").write_text(original, encoding="utf-8")
+
+    res = client.get("/api/events/403AC0000000076/revised", params={"doc_id": "規程.md"})
+
+    assert res.status_code == 200
+    assert "小学校第三学年修了前" in res.text
+    assert res.headers["X-Applied-Count"] == "1"
+    # 元のファイルには触らない（設計原則2）
+    assert (watch_dir / "規程.md").read_text(encoding="utf-8") == original
+
+
+def test_download_tells_where_to_put_it_back(results_dir: Path, watch_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_fix())
+    (watch_dir / "規程.md").write_text("第21条 小学校就学の始期に達するまでの子。", encoding="utf-8")
+    res = client.get("/api/events/403AC0000000076/revised", params={"doc_id": "規程.md"})
+    assert "規程.md" in unquote(res.headers["X-Replace-Target"])
+
+
+def test_download_without_a_proposal_is_404(results_dir: Path, watch_dir: Path) -> None:
+    write(results_dir, "a.json", a_result())  # alerts が空
+    res = client.get("/api/events/403AC0000000076/revised", params={"doc_id": "規程.md"})
+    assert res.status_code == 404
+
+
+def test_download_reports_when_the_fix_does_not_match(results_dir: Path, watch_dir: Path) -> None:
+    """当てられなかったときに、成功したふりをして元のままのファイルを返さない。"""
+    write(results_dir, "a.json", a_result_with_fix())
+    (watch_dir / "規程.md").write_text("まったく別の本文。", encoding="utf-8")
+    res = client.get("/api/events/403AC0000000076/revised", params={"doc_id": "規程.md"})
+    assert res.status_code == 422
+    assert "見つかりません" in res.json()["detail"]
+
+
+def test_download_of_a_missing_file_is_reported(results_dir: Path, watch_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_fix())
+    res = client.get("/api/events/403AC0000000076/revised", params={"doc_id": "規程.md"})
+    assert res.status_code == 422
 
 
 def test_health_still_works() -> None:

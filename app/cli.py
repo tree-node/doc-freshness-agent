@@ -23,7 +23,9 @@ from app.index import ChunkIndex, build_index
 from app.llm.client import CostLog, LLMError, OrcaRouterClient
 from app.llm.pricing import PriceTable
 from app.pipeline.run import ModelSet, load_cache, run_pipeline
+from app.proposal import affected_doc_ids, edits_from_result, generate_revised_document
 from app.sources import LocalFolderSource
+from app.sources.local import UnsupportedFormatError
 
 MAX_PREVIEW = 60
 
@@ -232,6 +234,53 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_propose(args: argparse.Namespace) -> int:
+    """要対応と判定された文書の修正版を作る。元のファイルには触らない。"""
+    result_path = (
+        Path(args.result) if args.result else settings.results_dir / f"{args.law_id}.json"
+    )
+    if not result_path.exists():
+        print(f"エラー: 検知結果がありません: {result_path}", file=sys.stderr)
+        print(f"先に `python -m app.cli run {args.law_id}` を実行してください", file=sys.stderr)
+        return 1
+
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    watch_root = Path(args.dir) if args.dir else settings.watch_root
+    out_dir = Path(args.out) if args.out else settings.outputs_dir / args.law_id
+
+    targets = [args.doc_id] if args.doc_id else affected_doc_ids(result)
+    if not targets:
+        print("要対応と判定された文書はありません")
+        return 0
+
+    print(f"{result.get('law_title', args.law_id)}: {len(targets)} 件の修正版を作ります")
+    incomplete = 0
+    for doc_id in targets:
+        edits = edits_from_result(result, doc_id)
+        if not edits:
+            print(f"  ─ {doc_id}: 修正案が付いていないため飛ばします")
+            continue
+        try:
+            generated = generate_revised_document(watch_root / doc_id, doc_id, edits, out_dir)
+        except (FileNotFoundError, UnsupportedFormatError) as exc:
+            print(f"  ✗ {doc_id}: {exc}")
+            incomplete += 1
+            continue
+
+        mark = "✓" if generated.fully_applied else "△"
+        print(f"  {mark} {doc_id}: {len(generated.applied)}箇所を修正")
+        print(f"      作成: {generated.output_path}")
+        print(f"      置換先: {generated.replace_target}")
+        for edit in generated.applied:
+            print(f"        - {edit.location}")
+        for edit, reason in generated.skipped:
+            incomplete += 1
+            print(f"      ! {edit.location or '(箇所不明)'}: {reason}")
+
+    print("\n中身を確認してから、置換先のファイルと差し替えてください（自動では置き換えません）")
+    return 1 if incomplete else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="app.cli", description="ドキュメント鮮度監視エージェント")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -280,6 +329,14 @@ def build_parser() -> argparse.ArgumentParser:
     for stage in ("stage0", "stage2", "stage3", "escalation"):
         p_run.add_argument(f"--model-{stage}", help=f"{stage} のモデル名（既定: .env）")
     p_run.set_defaults(func=cmd_run)
+
+    p_propose = sub.add_parser("propose", help="要対応の文書の修正版ファイルを作る")
+    p_propose.add_argument("law_id")
+    p_propose.add_argument("--result", help="検知結果JSON（既定: RESULTS_DIR/{law_id}.json）")
+    p_propose.add_argument("--dir", help="監視対象フォルダ（既定: WATCH_ROOT）")
+    p_propose.add_argument("--out", help="修正版の書き出し先（既定: OUTPUTS_DIR/{law_id}）")
+    p_propose.add_argument("--doc-id", help="この文書だけを作る")
+    p_propose.set_defaults(func=cmd_propose)
 
     return parser
 

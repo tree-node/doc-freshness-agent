@@ -12,10 +12,15 @@ import json
 from pathlib import Path
 from typing import Any
 
+from urllib.parse import quote
+
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.history import load_checks
+from app.proposal import edits_from_result, generate_revised_document
+from app.sources.local import UnsupportedFormatError
 
 router = APIRouter(prefix="/api")
 
@@ -32,6 +37,14 @@ def snapshots_dir() -> Path:
 
 def history_path() -> Path:
     return settings.history_path
+
+
+def watch_root() -> Path:
+    return settings.watch_root
+
+
+def outputs_dir() -> Path:
+    return settings.outputs_dir
 
 
 def _load_results(directory: Path | None = None) -> list[dict[str, Any]]:
@@ -81,6 +94,40 @@ def get_event(law_id: str) -> dict[str, Any]:
         if result["law_id"] == law_id:
             return result
     raise HTTPException(status_code=404, detail=f"イベントが見つかりません: {law_id}")
+
+
+@router.get("/events/{law_id}/revised")
+def download_revised_document(law_id: str, doc_id: str) -> FileResponse:
+    """修正版ファイルを作って返す。
+
+    **元のファイルには触らない**（DESIGN.md 設計原則2）。置換先のパスはヘッダーで伝え、
+    実際に置き換えるかどうかは受け取った人間が決める。
+    """
+    result = get_event(law_id)
+    edits = edits_from_result(result, doc_id)
+    if not edits:
+        raise HTTPException(status_code=404, detail=f"この文書に対する修正案がありません: {doc_id}")
+
+    source = watch_root() / doc_id
+    try:
+        generated = generate_revised_document(source, doc_id, edits, outputs_dir() / law_id)
+    except (FileNotFoundError, UnsupportedFormatError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    if not generated.applied:
+        reasons = "／".join(reason for _, reason in generated.skipped) or "理由不明"
+        raise HTTPException(status_code=422, detail=f"修正を当てられませんでした: {reasons}")
+
+    return FileResponse(
+        generated.output_path,
+        filename=Path(doc_id).name,
+        headers={
+            # 置換先と、当てられなかった箇所の数を一緒に返す（黙って落とさない）
+            "X-Replace-Target": quote(generated.replace_target),
+            "X-Applied-Count": str(len(generated.applied)),
+            "X-Skipped-Count": str(len(generated.skipped)),
+        },
+    )
 
 
 @router.get("/rules")
