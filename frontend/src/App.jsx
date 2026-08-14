@@ -1,47 +1,61 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import Sidebar from './components/Sidebar.jsx';
+import HomeScreen from './screens/HomeScreen.jsx';
+import EventDetailScreen from './screens/EventDetailScreen.jsx';
+import FindingDetailScreen from './screens/FindingDetailScreen.jsx';
 
-// 雛形。画面（ホーム → 変更の詳細 → 指摘詳細）は DESIGN.md の実装順で足していく。
-// ここではバックエンド疎通と Tailwind が効いていることだけを確認する。
+// 3画面（ホーム → 変更の詳細 → 指摘詳細）の行き来は、ルーティングライブラリを追加せず
+// 画面状態の切り替えで実装する（DESIGN.md「リッチな作り込みはしない」に合わせる）。
 export default function App() {
-  const [health, setHealth] = useState(null)
-  const [error, setError] = useState(null)
+  const [nav, setNav] = useState({ screen: 'home' });
 
   useEffect(() => {
-    fetch('/api/health')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then(setHealth)
-      .catch((e) => setError(e.message))
-  }, [])
+    window.scrollTo(0, 0);
+  }, [nav]);
+
+  const goHome = () => setNav({ screen: 'home' });
+  const goEvent = (eventId, changeId) => setNav({ screen: 'event', eventId, changeId });
+  const goFinding = (eventId, changeId, chunkId) => setNav({ screen: 'finding', eventId, changeId, chunkId });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-4">
-          <h1 className="text-lg font-semibold">ドキュメント鮮度監視エージェント</h1>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <section className="rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-3 text-sm font-medium text-slate-500">バックエンド接続</h2>
-          {error && <p className="text-sm text-red-600">接続できません: {error}</p>}
-          {!error && !health && <p className="text-sm text-slate-500">確認中…</p>}
-          {health && (
-            <p className="text-sm">
-              接続できました（データベース:{' '}
-              {health.db.writable ? '書き込み可' : '書き込み不可'}）
-            </p>
-          )}
-        </section>
+    <div className="flex min-h-screen">
+      <Sidebar screen={nav.screen} onHome={goHome} />
+      <main className="min-w-0 flex-1 px-11 pb-18 pt-9" style={{ maxWidth: 980 }}>
+        {nav.screen === 'home' && <HomeScreen onOpenEvent={goEvent} onOpenFinding={goFinding} />}
+        {nav.screen === 'event' && (
+          <EventDetailScreen eventId={nav.eventId} initialChangeId={nav.changeId} onHome={goHome} onOpenFinding={goFinding} />
+        )}
+        {nav.screen === 'finding' && (
+          <FindingDetailScreen
+            eventId={nav.eventId}
+            changeId={nav.changeId}
+            chunkId={nav.chunkId}
+            onHome={goHome}
+            onOpenEvent={goEvent}
+          />
+        )}
+        <Attribution />
       </main>
-
-      <footer className="mx-auto max-w-4xl px-6 pb-10 text-xs text-slate-500">
-        {health?.attribution ??
-          '法令データは e-Gov 法令検索（デジタル庁）法令API v2 より取得しています。'}
-      </footer>
     </div>
-  )
+  );
+}
+
+/**
+ * 法令データの出典明示。政府標準利用規約に基づき、READMEとアプリのフッターの両方に出す
+ * （DESIGN.md 公開リポジトリの制約）。全画面で出したいので App に置く。
+ */
+function Attribution() {
+  return (
+    <footer className="mt-14 border-t border-[var(--line)] pt-4 text-[11.5px] leading-relaxed text-[var(--sub)]">
+      法令データは{' '}
+      <a href="https://laws.e-gov.go.jp/" target="_blank" rel="noreferrer" className="underline">
+        e-Gov 法令検索
+      </a>
+      （デジタル庁）の法令API v2 より取得しています。利用は{' '}
+      <a href="https://www.digital.go.jp/copyright-policy" target="_blank" rel="noreferrer" className="underline">
+        政府標準利用規約
+      </a>
+      に基づきます。表示している社内文書はデモ用の架空の会社のものです。
+    </footer>
+  );
 }

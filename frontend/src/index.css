@@ -1,6 +1,54 @@
 @import 'tailwindcss';
 
-/* UI方針: ライトテーマ / シンプル / 非エンジニアに優しい（DESIGN.md 画面構成） */
+/*
+ * UI方針: ライトテーマ / シンプル / 非エンジニアに優しい（DESIGN.md 画面構成）
+ * 配色・フォントは docs/ui-mock.html の :root 変数をそのまま移植する。
+ * 朱 (--shu) は状態色専用（要対応・指摘ハイライト）。
+ */
+:root {
+  --paper: #fbfaf7;
+  --card: #ffffff;
+  --line: #e6e4de;
+  --ink: #23282e;
+  --sub: #6b7280;
+  --green: #0e6e63;
+  --green-soft: #e7f1ee;
+  --shu: #b0482b;
+  --shu-soft: #f9ede8;
+  --amber: #9a6b12;
+  --amber-soft: #f7efdd;
+  --font-sans: 'Zen Kaku Gothic New', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
 html {
   color-scheme: light;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.8;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* 折りたたみの三角マーカー（ui-mock.html の details と挙動を揃える） */
+.chev::before {
+  content: '▸';
+}
+.chev.open::before {
+  content: '▾';
+}
+
+mark {
+  background: transparent;
+  border-bottom: 3px solid var(--shu);
+  color: inherit;
+  padding-bottom: 1px;
 }

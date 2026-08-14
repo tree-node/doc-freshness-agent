@@ -1,0 +1,834 @@
+{
+  "law_id": "403AC0000000076",
+  "law_title": "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
+  "from_revision": "403AC0000000076_20240531_506AC0000000042",
+  "to_revision": "403AC0000000076_20251001_506AC0000000042",
+  "enforcement_date": "2025-10-01",
+  "changes": [
+    {
+      "change": {
+        "change_id": "chg-001",
+        "change_type": "amend",
+        "target_path": "本則 > 第四章　子の看護等休暇 > 第十六条の二",
+        "before_excerpt": "小学校就学の始期に達するまでの子を養育する労働者は、その事業主に申し出ることにより、一の年度において五労働日（その養育する小学校就学の始期に達するまでの子が二人以上の場合にあっては、十労働日）を限度として、負傷し、若しくは疾病にかかった当該子の世話又は疾病の予防を図るために必要なものとして厚生労働省令で定める当該子の世話を行うための休暇（以下「子の看護休暇」という。）を取得することができる。",
+        "after_excerpt": "九歳に達する日以後の最初の三月三十一日までの間にある子（以下この項において「小学校第三学年修了前の子」という。）を養育する労働者は、その事業主に申し出ることにより、一の年度において五労働日（その養育する小学校第三学年修了前の子が二人以上の場合にあっては、十労働日）を限度として、負傷し、若しくは疾病にかかった当該小学校第三学年修了前の子の世話、疾病の予防を図るために必要なものとして厚生労働省令で定める当該小学校第三学年修了前の子の世話若しくは学校保健安全法（昭和三十三年法律第五十六号）第二十条の規定による学校の休業その他これに準ずるものとして厚生労働省令で定める事由に伴う当該小学校第三学年修了前の子の世話を行うため、又は当該小学校第三学年修了前の子の教育若しくは保育に係る行事のうち厚生労働省令で定めるものへの参加をするための休暇（以下「子の看護等休暇」という。）を取得することができる。",
+        "summary": "子の看護休暇の対象となる子の範囲が「小学校就学の始期に達するまで」から「小学校第三学年修了前（9歳に達する日以後の最初の3月31日まで）」に拡大され、名称が「子の看護等休暇」に変更されるとともに、学級閉鎖や行事参加などの取得事由が追加されました。",
+        "affected_domains": [
+          "子の看護休暇",
+          "育児休業",
+          "就業規則",
+          "両立支援"
+        ],
+        "semantic_query": "小学校就学の始期に達するまでの子を養育する労働者が、病気やけが、予防接種などのために年5日（2人以上の場合は10日）まで子の看護休暇を取得できるとする社内規定。",
+        "exact_terms": [
+          "第十六条の二",
+          "子の看護休暇",
+          "小学校就学の始期に達するまで",
+          "就学の始期に達するまでの子"
+        ],
+        "effective_date": "2025-10-01",
+        "effective_date_note": null,
+        "transitional": false,
+        "confidence": 1.0,
+        "needs_human_review": false,
+        "note": null
+      },
+      "candidates": [
+        {
+          "chunk_id": "契約書/雇用契約書_佐藤みなみ.md#4",
+          "doc_id": "契約書/雇用契約書_佐藤みなみ.md",
+          "label": "雇用契約書 > 第4条（休暇）",
+          "rrf_score": 0.032787,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#4",
+          "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+          "label": "雇用契約書（ひな形） > 第4条（休暇）",
+          "rrf_score": 0.032002,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#2",
+          "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+          "label": "第28条（育児・介護休業、子の看護休暇等）",
+          "rrf_score": 0.031258,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#6",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "rrf_score": 0.030777,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#6",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "rrf_score": 0.03031,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#5",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第5条（子の養育等への配慮）",
+          "rrf_score": 0.02895,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#2",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(年次有給休暇の時間単位での付与) > 第24条",
+          "rrf_score": 0.025658,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#2",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(年次有給休暇の時間単位での付与) > 第24条",
+          "rrf_score": 0.025333,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#7",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(不妊治療休暇) > 第29条",
+          "rrf_score": 0.02491,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#7",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(不妊治療休暇) > 第29条",
+          "rrf_score": 0.024802,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#4",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(母性健康管理の措置) > 第26条",
+          "rrf_score": 0.024585,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#4",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(母性健康管理の措置) > 第26条",
+          "rrf_score": 0.024563,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#5",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(育児時間及び生理休暇) > 第27条",
+          "rrf_score": 0.024411,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#9",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(病気休暇) > 第31条",
+          "rrf_score": 0.024286,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#5",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(育児時間及び生理休暇) > 第27条",
+          "rrf_score": 0.024271,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#9",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(病気休暇) > 第31条",
+          "rrf_score": 0.024186,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#4",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(家族手当) > 第35条",
+          "rrf_score": 0.02396,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#0",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "株式会社サクラベース/休暇規程.docx",
+          "rrf_score": 0.02379,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#4",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(家族手当) > 第35条",
+          "rrf_score": 0.023676,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#0",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "rrf_score": 0.022274,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#12",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(休暇等の賃金) > 第43条",
+          "rrf_score": 0.019913,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#12",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(休暇等の賃金) > 第43条",
+          "rrf_score": 0.019905,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#10",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(裁判員等のための休暇等) > 第32条",
+          "rrf_score": 0.019508,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#10",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(裁判員等のための休暇等) > 第32条",
+          "rrf_score": 0.019484,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#11",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(代替休暇) > 第42条",
+          "rrf_score": 0.018525,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/AI利用ガイド.md#4",
+          "doc_id": "共有フォルダ（未整理）/AI利用ガイド.md",
+          "label": "社内AI利用ガイド（ドラフト） > 4. 人事関連の問い合わせ対応での利用",
+          "rrf_score": 0.015625,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#5",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(通勤手当) > 第36条",
+          "rrf_score": 0.014706,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#5",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(通勤手当) > 第36条",
+          "rrf_score": 0.014493,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#24",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.014286,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#24",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.014085,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#24",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.013889,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#1",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(年次有給休暇) > 第23条",
+          "rrf_score": 0.013699,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#25",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (勤務間インターバル制度) > 第22条",
+          "rrf_score": 0.013699,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#25",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (勤務間インターバル制度) > 第22条",
+          "rrf_score": 0.013514,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#1",
+          "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+          "label": "第23条（年次有給休暇）",
+          "rrf_score": 0.013514,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#1",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(年次有給休暇) > 第23条",
+          "rrf_score": 0.013333,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#25",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (勤務間インターバル制度) > 第22条",
+          "rrf_score": 0.013333,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#8",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(慶弔休暇) > 第30条",
+          "rrf_score": 0.013158,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#8",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(慶弔休暇) > 第30条",
+          "rrf_score": 0.012987,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#22",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.0125,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#22",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.012346,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#22",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.012195,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#7",
+          "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+          "label": "雇用契約書（ひな形） > 第7条（その他）",
+          "rrf_score": 0.012048,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/AI利用ガイド.md#5",
+          "doc_id": "共有フォルダ（未整理）/AI利用ガイド.md",
+          "label": "社内AI利用ガイド（ドラフト） > 5. 各種チェックツールについて",
+          "rrf_score": 0.011905,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#19",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日",
+          "rrf_score": 0.011628,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#19",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日",
+          "rrf_score": 0.011494,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#15",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第3章 服務規律 > (その他あらゆるハラスメントの禁止) > 第15条",
+          "rrf_score": 0.011494,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#15",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第3章 服務規律 > (その他あらゆるハラスメントの禁止) > 第15条",
+          "rrf_score": 0.011364,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#19",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日",
+          "rrf_score": 0.011364,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#15",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第3章 服務規律 > (その他あらゆるハラスメントの禁止) > 第15条",
+          "rrf_score": 0.011236,
+          "reason": "検索上位",
+          "linked": false
+        }
+      ],
+      "stage2_scores": {
+        "契約書/雇用契約書_佐藤みなみ.md#4": 1.0,
+        "株式会社サクラベース/雇用契約書_ひな形.md#4": 1.0,
+        "共有フォルダ（未整理）/メモ_final_v2.md#2": 1.0,
+        "株式会社サクラベース/休暇規程.docx#6": 1.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#6": 1.0,
+        "契約書/業務委託契約書_合同会社ミナトデザイン.md#5": 1.0,
+        "株式会社サクラベース/休暇規程.docx#2": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#2": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#7": 0.0,
+        "株式会社サクラベース/休暇規程.docx#7": 0.0,
+        "株式会社サクラベース/休暇規程.docx#4": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#4": 0.0,
+        "株式会社サクラベース/休暇規程.docx#5": 0.0,
+        "株式会社サクラベース/休暇規程.docx#9": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#5": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#9": 0.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#4": 0.0,
+        "株式会社サクラベース/休暇規程.docx#0": 0.5,
+        "株式会社サクラベース/賃金規程.docx#4": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#0": 0.5,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#12": 0.5,
+        "株式会社サクラベース/賃金規程.docx#12": 0.3,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#10": 0.0,
+        "株式会社サクラベース/休暇規程.docx#10": 0.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#11": 0.0,
+        "共有フォルダ（未整理）/AI利用ガイド.md#4": 1.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#5": 0.0,
+        "株式会社サクラベース/賃金規程.docx#5": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#24": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#24": 0.0,
+        "株式会社サクラベース/就業規則.docx#24": 0.0,
+        "株式会社サクラベース/休暇規程.docx#1": 0.0,
+        "株式会社サクラベース/就業規則.docx#25": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#25": 0.0,
+        "共有フォルダ（未整理）/メモ_final_v2.md#1": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#1": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#25": 0.0,
+        "株式会社サクラベース/休暇規程.docx#8": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#8": 0.0,
+        "株式会社サクラベース/就業規則.docx#22": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#22": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#22": 0.0,
+        "株式会社サクラベース/雇用契約書_ひな形.md#7": 0.1,
+        "共有フォルダ（未整理）/AI利用ガイド.md#5": 0.0,
+        "株式会社サクラベース/就業規則.docx#19": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#19": 0.0,
+        "株式会社サクラベース/就業規則.docx#15": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#15": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#19": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#15": 0.0
+      },
+      "findings": [
+        {
+          "chunk_id": "契約書/雇用契約書_佐藤みなみ.md#4",
+          "doc_id": "契約書/雇用契約書_佐藤みなみ.md",
+          "label": "雇用契約書 > 第4条（休暇）",
+          "document_nature": "締結済みの個別雇用契約書",
+          "law_applicability": "applicable",
+          "applicability_reason": "乙は労働者であり、育児介護休業法に基づく子の看護休暇の適用対象となる。契約書に子の看護休暇の対象年齢を明記しており、法改正による対象範囲拡大の影響を受ける",
+          "impact": "affected",
+          "deadline_type": "on_renewal",
+          "evidence_quote": "2 小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+          "evidence_location": "雇用契約書 > 第4条（休暇）第2項",
+          "fix_proposal": {
+            "before": "小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+            "after": "小学校第三学年修了前の子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護等休暇を取得することができる。"
+          },
+          "confidence": 0.85,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "global.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#4",
+          "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+          "label": "雇用契約書（ひな形） > 第4条（休暇）",
+          "document_nature": "雇用契約書のひな形（今後の締結に用いるテンプレート）",
+          "law_applicability": "applicable",
+          "applicability_reason": "この文書は労働者である乙と使用者である甲との雇用契約に関するものであり、育児介護休業法の子の看護休暇の規定が適用される。ひな形自体に子の看護休暇の対象年齢や名称が明記されており、改正内容が直接反映される箇所である",
+          "impact": "affected",
+          "deadline_type": "immediate",
+          "evidence_quote": "小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+          "evidence_location": "雇用契約書（ひな形） > 第4条（休暇）第2項",
+          "fix_proposal": {
+            "before": "小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+            "after": "小学校第三学年修了前の子を養育する乙は、就業規則の定めるところにより、1年度において5日（当該子が2人以上の場合は10日）を限度として子の看護等休暇を取得することができる。"
+          },
+          "confidence": 0.9,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#2",
+          "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+          "label": "第28条（育児・介護休業、子の看護休暇等）",
+          "document_nature": "人事部内の非公式なメモ・下書き（正式な就業規則の草稿的位置づけだが、本文冒頭に『正式版は人事のフォルダにあるやつが正』とあり、これ自体は正式な規程ではない）",
+          "law_applicability": "applicable",
+          "applicability_reason": "労働者に対する子の看護休暇制度を定めた社内規程の草稿であり、育児介護休業法の適用対象となる。ただし本文書自体は正式版ではなく、正式な就業規則は別フォルダにあるとされているため、正式規程への反映が必要な情報として扱う",
+          "impact": "affected",
+          "deadline_type": "immediate",
+          "evidence_quote": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の1か月前までに書面にて申請を行わなければならない。",
+          "evidence_location": "第28条第2項",
+          "fix_proposal": {
+            "before": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の1か月前までに書面にて申請を行わなければならない。",
+            "after": "子の看護等休暇を取得しようとする者は、対象となる子（小学校第三学年修了前、すなわち9歳に達する日以後の最初の3月31日までの子に限る）の病気・怪我の看病、疾病の予防、学級閉鎖等の学校の休業、または学校行事への参加等を理由とする場合に、取得希望日の1か月前までに書面にて申請を行わなければならない。"
+          },
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#6",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "document_nature": "就業規則の一部である休暇規程",
+          "law_applicability": "applicable",
+          "applicability_reason": "本規程は労働者に適用される社内規則であり、育児介護休業法上の子の看護休暇（子の看護等休暇）に関する定めを含むため、同法の改正が直接適用される",
+          "impact": "affected",
+          "deadline_type": "immediate",
+          "evidence_quote": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の 1 か月前までに 書面にて申請を行わなければならない。",
+          "evidence_location": "第5章 休暇等 > 第28条第2項",
+          "fix_proposal": {
+            "before": "2 子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の 1 か月前までに 書面にて申請を行わなければならない。",
+            "after": "2 子の看護等休暇を取得しようとする者は、対象となる子（小学校第三学年修了前の子に限る）の病気・怪我の看病、疾病の予防、学級閉鎖その他これに準ずる事由による世話、又は当該子の教育若しくは保育に係る行事への参加を理由とする場合に、あらかじめ書面にて申請を行わなければならない。"
+          },
+          "confidence": 0.92,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#6",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "document_nature": "就業規則の一部である休暇規程（社内規定）",
+          "law_applicability": "applicable",
+          "applicability_reason": "労働者を対象とした子の看護等休暇制度を定める規定であり、育児・介護休業法の適用対象となる",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "第28条 育児休業、出生時育児休業、介護休業、子の看護等休暇、介護休暇等の適用を受けることができる。",
+          "evidence_location": "第5章 休暇等 > 第28条",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#5",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第5条（子の養育等への配慮）",
+          "document_nature": "業務委託契約書（受託者である合同会社との間の契約であり、労働者向けの就業規則ではない）",
+          "law_applicability": "not_applicable",
+          "applicability_reason": "本契約は甲（委託者）と乙（受託事業者）との間の業務委託契約であり、乙の代表者や従業員は甲との関係において労働基準法・育児介護休業法上の「労働者」ではない。第5条は納期調整という商取引上の配慮を定めた任意の合意条項であり、育児介護休業法第16条の2が定める子の看護休暇（子の看護等休暇）の法定制度そのものを規定したものではないため、同法の直律的効力は及ばない。",
+          "impact": "not_applicable",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.85,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/AI利用ガイド.md#4",
+          "doc_id": "共有フォルダ（未整理）/AI利用ガイド.md",
+          "label": "社内AI利用ガイド（ドラフト） > 4. 人事関連の問い合わせ対応での利用",
+          "document_nature": "社内AI利用ガイド（ドラフト）。生成AIの利用方針を定めた社内マニュアルであり、就業規則や労働条件そのものを定めるものではない",
+          "law_applicability": "not_applicable",
+          "applicability_reason": "この文書はAIチャットボットの回答方針・運用ルールを定めたものであり、育児介護休業法が直接適用される労働条件の定めではない。該当箇所も『小学校就学の始期に達するまでの子』という規程の文言を古い例として引用しつつ、むしろAIに規程文言をそのまま回答させず人事部に回すよう注意喚起する内容であり、法改正によってこのガイドの方針自体が誤りになるわけではない。ただし、就業規則・休暇規程側は別途改正対応が必要であり、本ガイドの記述はその前提（規程が古い可能性がある）を正しく認識した記述になっている",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.82,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "global.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#0",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "株式会社サクラベース/休暇規程.docx",
+          "document_nature": "就業規則の一部（休暇規程）",
+          "law_applicability": "unclear",
+          "applicability_reason": "文書は休暇に関する社内規程であり育児介護休業法の適用対象となりうるが、提示された該当箇所は章タイトルのみで、子の看護休暇に関する具体的な条文（対象となる子の範囲や年齢要件、取得事由等）が含まれていない。実際の子の看護休暇規定の条文内容が不明であるため、改正内容との齟齬の有無を判断できない",
+          "impact": "not_applicable",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "第5章 休暇等",
+          "fix_proposal": null,
+          "confidence": 0.3,
+          "needs_human_review": true,
+          "review_reason": "法令の適用可否が判断できていません / 確信度が低い（0.3）",
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#0",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "document_nature": "就業規則の一部である休暇規程（社内規定）",
+          "law_applicability": "unclear",
+          "applicability_reason": "文書は休暇規程であり育児介護休業法が適用される性質の文書だが、該当箇所として提示されたのは章タイトルと冒頭部分のみで、子の看護休暇に関する具体的な条文（対象となる子の年齢範囲や取得事由）が示されていないため、実際に影響を受ける記述があるか判断できない",
+          "impact": "not_applicable",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "第5章 休暇等",
+          "fix_proposal": null,
+          "confidence": 0.3,
+          "needs_human_review": true,
+          "review_reason": "法令の適用可否が判断できていません / 確信度が低い（0.3）",
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#12",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(休暇等の賃金) > 第43条",
+          "document_nature": "賃金規程（就業規則の一部）",
+          "law_applicability": "unclear",
+          "applicability_reason": "本条は年次有給休暇の賃金と特別休暇等の賃金の取扱い（無給か有給か）を定める規定であり、子の看護等休暇の対象範囲や取得事由そのものを規定するものではない。子の看護等休暇が「特別休暇等」に含まれる場合、その無給／有給の扱い自体は本改正で変更されないため直接の適用対象ではないが、休暇制度の名称・範囲変更に伴い、育児・介護休業規程等の該当規定との整合性確認が必要になる可能性がある",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": true,
+          "review_reason": "法令の適用可否が判断できていません",
+          "evidence_verified": true,
+          "model": "global.anthropic.claude-sonnet-5"
+        }
+      ],
+      "funnel": {
+        "total_chunks": 171,
+        "stage1_passed": 50,
+        "stage2_passed": 10,
+        "stage3_judged": 10,
+        "affected": 4,
+        "not_affected": 6,
+        "stage1_excluded": 121
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "doc_id": "契約書/雇用契約書_佐藤みなみ.md",
+      "location": "demo-data/監視対象/契約書/雇用契約書_佐藤みなみ.md",
+      "chunk_id": "契約書/雇用契約書_佐藤みなみ.md#4",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "契約書/雇用契約書_佐藤みなみ.md#4",
+        "doc_id": "契約書/雇用契約書_佐藤みなみ.md",
+        "label": "雇用契約書 > 第4条（休暇）",
+        "document_nature": "締結済みの個別雇用契約書",
+        "law_applicability": "applicable",
+        "applicability_reason": "乙は労働者であり、育児介護休業法に基づく子の看護休暇の適用対象となる。契約書に子の看護休暇の対象年齢を明記しており、法改正による対象範囲拡大の影響を受ける",
+        "impact": "affected",
+        "deadline_type": "on_renewal",
+        "evidence_quote": "2 小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+        "evidence_location": "雇用契約書 > 第4条（休暇）第2項",
+        "fix_proposal": {
+          "before": "小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+          "after": "小学校第三学年修了前の子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護等休暇を取得することができる。"
+        },
+        "confidence": 0.85,
+        "needs_human_review": false,
+        "review_reason": null,
+        "evidence_verified": true,
+        "model": "global.anthropic.claude-sonnet-5"
+      }
+    },
+    {
+      "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+      "location": "demo-data/監視対象/株式会社サクラベース/雇用契約書_ひな形.md",
+      "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#4",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "契約書/雇用契約書_佐藤みなみ.md#4",
+        "doc_id": "契約書/雇用契約書_佐藤みなみ.md",
+        "label": "雇用契約書 > 第4条（休暇）",
+        "document_nature": "締結済みの個別雇用契約書",
+        "law_applicability": "applicable",
+        "applicability_reason": "乙は労働者であり、育児介護休業法に基づく子の看護休暇の適用対象となる。契約書に子の看護休暇の対象年齢を明記しており、法改正による対象範囲拡大の影響を受ける",
+        "impact": "affected",
+        "deadline_type": "on_renewal",
+        "evidence_quote": "2 小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+        "evidence_location": "雇用契約書 > 第4条（休暇）第2項",
+        "fix_proposal": {
+          "before": "小学校就学の始期に達するまでの子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護休暇を取得することができる。",
+          "after": "小学校第三学年修了前の子を養育する乙は、就業規則の定めるところにより、1年度において5日を限度として子の看護等休暇を取得することができる。"
+        },
+        "confidence": 0.85,
+        "needs_human_review": false,
+        "review_reason": null,
+        "evidence_verified": true,
+        "model": "global.anthropic.claude-sonnet-5"
+      }
+    },
+    {
+      "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+      "location": "demo-data/監視対象/共有フォルダ（未整理）/メモ_final_v2.md",
+      "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#2",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#2",
+        "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+        "label": "第28条（育児・介護休業、子の看護休暇等）",
+        "document_nature": "人事部内の非公式なメモ・下書き（正式な就業規則の草稿的位置づけだが、本文冒頭に『正式版は人事のフォルダにあるやつが正』とあり、これ自体は正式な規程ではない）",
+        "law_applicability": "applicable",
+        "applicability_reason": "労働者に対する子の看護休暇制度を定めた社内規程の草稿であり、育児介護休業法の適用対象となる。ただし本文書自体は正式版ではなく、正式な就業規則は別フォルダにあるとされているため、正式規程への反映が必要な情報として扱う",
+        "impact": "affected",
+        "deadline_type": "immediate",
+        "evidence_quote": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の1か月前までに書面にて申請を行わなければならない。",
+        "evidence_location": "第28条第2項",
+        "fix_proposal": {
+          "before": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の1か月前までに書面にて申請を行わなければならない。",
+          "after": "子の看護等休暇を取得しようとする者は、対象となる子（小学校第三学年修了前、すなわち9歳に達する日以後の最初の3月31日までの子に限る）の病気・怪我の看病、疾病の予防、学級閉鎖等の学校の休業、または学校行事への参加等を理由とする場合に、取得希望日の1か月前までに書面にて申請を行わなければならない。"
+        },
+        "confidence": 0.75,
+        "needs_human_review": false,
+        "review_reason": null,
+        "evidence_verified": true,
+        "model": "jp.anthropic.claude-sonnet-5"
+      }
+    },
+    {
+      "doc_id": "株式会社サクラベース/休暇規程.docx",
+      "location": "demo-data/監視対象/株式会社サクラベース/休暇規程.docx",
+      "chunk_id": "株式会社サクラベース/休暇規程.docx#6",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "株式会社サクラベース/休暇規程.docx#6",
+        "doc_id": "株式会社サクラベース/休暇規程.docx",
+        "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+        "document_nature": "就業規則の一部である休暇規程",
+        "law_applicability": "applicable",
+        "applicability_reason": "本規程は労働者に適用される社内規則であり、育児介護休業法上の子の看護休暇（子の看護等休暇）に関する定めを含むため、同法の改正が直接適用される",
+        "impact": "affected",
+        "deadline_type": "immediate",
+        "evidence_quote": "子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の 1 か月前までに 書面にて申請を行わなければならない。",
+        "evidence_location": "第5章 休暇等 > 第28条第2項",
+        "fix_proposal": {
+          "before": "2 子の看護休暇を取得しようとする者は、対象となる子（未就学児に限る）の病気・怪我の看病等を理由とする場合に限り、取得希望日の 1 か月前までに 書面にて申請を行わなければならない。",
+          "after": "2 子の看護等休暇を取得しようとする者は、対象となる子（小学校第三学年修了前の子に限る）の病気・怪我の看病、疾病の予防、学級閉鎖その他これに準ずる事由による世話、又は当該子の教育若しくは保育に係る行事への参加を理由とする場合に、あらかじめ書面にて申請を行わなければならない。"
+        },
+        "confidence": 0.92,
+        "needs_human_review": false,
+        "review_reason": null,
+        "evidence_verified": true,
+        "model": "jp.anthropic.claude-sonnet-5"
+      }
+    }
+  ],
+  "cost": {
+    "calls": 62,
+    "total_tokens": 62717,
+    "cost_usd": 0.1413522,
+    "by_model": {
+      "google/gemini-3.5-flash": {
+        "calls": 2,
+        "prompt_tokens": 3117,
+        "completion_tokens": 4159,
+        "cost_usd": 0.042106500000000005
+      },
+      "google/gemini-3.5-flash-lite": {
+        "calls": 50,
+        "prompt_tokens": 25449,
+        "completion_tokens": 550,
+        "cost_usd": 0.009009699999999999
+      },
+      "anthropic/claude-sonnet-5": {
+        "calls": 10,
+        "prompt_tokens": 25523,
+        "completion_tokens": 3919,
+        "cost_usd": 0.09023600000000001
+      }
+    },
+    "cache": {
+      "hits": 0,
+      "misses": 10
+    }
+  }
+}

@@ -1,0 +1,856 @@
+{
+  "law_id": "322AC0000000049",
+  "law_title": "労働基準法",
+  "from_revision": "322AC0000000049_20180706_430AC0000000071",
+  "to_revision": "322AC0000000049_20260717_508AC0000000060",
+  "enforcement_date": "2026-07-17",
+  "changes": [
+    {
+      "change": {
+        "change_id": "chg-001",
+        "change_type": "delete",
+        "target_path": "附　則 > 第百三十八条",
+        "before_excerpt": "第百三十八条1中小事業主（その資本金の額又は出資の総額が三億円（小売業又はサービス業を主たる事業とする事業主については五千万円、卸売業を主たる事業とする事業主については一億円）以下である事業主及びその常時使用する労働者の数が三百人（小売業を主たる事業とする事業主については五十人、卸売業又はサービス業を主たる事業とする事業主については百人）以下である事業主をいう。）の事業については、当分の間、第三十七条第一項ただし書の規定は、適用しない。",
+        "after_excerpt": null,
+        "summary": "中小事業主に対する月60時間を超える時間外労働の割増賃金率（50%以上）の適用猶予を定めた、労働基準法附則第138条が削除されます。",
+        "affected_domains": [
+          "割増賃金",
+          "労働時間",
+          "給与計算"
+        ],
+        "semantic_query": "中小企業における月60時間を超える時間外労働の割増賃金率を25%とする旨の規定や、労働基準法附則第138条による割増賃金率の猶予措置を適用する旨の記載。",
+        "exact_terms": [
+          "附則第百三十八条",
+          "附則第138条",
+          "中小事業主",
+          "第三十七条第一項ただし書",
+          "割増賃金率",
+          "当分の間"
+        ],
+        "effective_date": "2026-07-17",
+        "effective_date_note": null,
+        "transitional": false,
+        "confidence": 1.0,
+        "needs_human_review": false,
+        "note": null
+      },
+      "candidates": [
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#9",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(割増賃金) > 第40条",
+          "rrf_score": 0.021311,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#9",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(割増賃金) > 第40条",
+          "rrf_score": 0.020464,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#2",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(賃金の構成) > 第33条",
+          "rrf_score": 0.020183,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#2",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(賃金の構成) > 第33条",
+          "rrf_score": 0.019873,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#11",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(代替休暇) > 第42条",
+          "rrf_score": 0.018651,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#11",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(代替休暇) > 第42条",
+          "rrf_score": 0.018386,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#7",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(技能・資格手当) > 第38条",
+          "rrf_score": 0.015385,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#7",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(技能・資格手当) > 第38条",
+          "rrf_score": 0.015152,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#18",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第3章 服務規律 > (遅刻、早退、欠勤等) > 第18条",
+          "rrf_score": 0.014925,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#21",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.014905,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#2",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(年次有給休暇の時間単位での付与) > 第24条",
+          "rrf_score": 0.014752,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#21",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.014709,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#18",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第3章 服務規律 > (遅刻、早退、欠勤等) > 第18条",
+          "rrf_score": 0.014706,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#21",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.014595,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#2",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(年次有給休暇の時間単位での付与) > 第24条",
+          "rrf_score": 0.014583,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#18",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第3章 服務規律 > (遅刻、早退、欠勤等) > 第18条",
+          "rrf_score": 0.014493,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#17",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(賃金の非常時払い) > 第48条",
+          "rrf_score": 0.014286,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#17",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(賃金の非常時払い) > 第48条",
+          "rrf_score": 0.014085,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#4",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第4条（報酬）",
+          "rrf_score": 0.013878,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#13",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第3章 服務規律 > (セクシュアルハラスメントの禁止) > 第13条",
+          "rrf_score": 0.013514,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#13",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第3章 服務規律 > (セクシュアルハラスメントの禁止) > 第13条",
+          "rrf_score": 0.013333,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#13",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第3章 服務規律 > (セクシュアルハラスメントの禁止) > 第13条",
+          "rrf_score": 0.013158,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#3",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(産前産後の休業) > 第25条",
+          "rrf_score": 0.013131,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#3",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(産前産後の休業) > 第25条",
+          "rrf_score": 0.013,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#6",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第2章 採用、異動等 > (試用期間) > 第6条",
+          "rrf_score": 0.012987,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#6",
+          "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+          "label": "雇用契約書（ひな形） > 第6条（賃金）",
+          "rrf_score": 0.012831,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#6",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第2章 採用、異動等 > (試用期間) > 第6条",
+          "rrf_score": 0.012821,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#0",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "株式会社サクラベース/賃金規程.docx",
+          "rrf_score": 0.012705,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#6",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第2章 採用、異動等 > (試用期間) > 第6条",
+          "rrf_score": 0.012658,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#20",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.0125,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#20",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.012346,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#20",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (労働時間及び休憩時間) > 第19条",
+          "rrf_score": 0.012195,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#3",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第3条（作業時間）",
+          "rrf_score": 0.011628,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#7",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(不妊治療休暇) > 第29条",
+          "rrf_score": 0.011494,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#7",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(不妊治療休暇) > 第29条",
+          "rrf_score": 0.011364,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#5",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第2章 採用、異動等 > (採用時の提出書類) > 第5条",
+          "rrf_score": 0.011236,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#5",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第2章 採用、異動等 > (採用時の提出書類) > 第5条",
+          "rrf_score": 0.011111,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#5",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第2章 採用、異動等 > (採用時の提出書類) > 第5条",
+          "rrf_score": 0.010989,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#6",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "rrf_score": 0.01087,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#2",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第2条（独立当事者）",
+          "rrf_score": 0.010638,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx#5",
+          "doc_id": "サクラベース・ロジスティクス株式会社/休暇規程.docx",
+          "label": "(育児時間及び生理休暇) > 第27条",
+          "rrf_score": 0.010309,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#5",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(育児時間及び生理休暇) > 第27条",
+          "rrf_score": 0.010204,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#9",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第2章 採用、異動等 > (休職) > 第9条",
+          "rrf_score": 0.009901,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#9",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第2章 採用、異動等 > (休職) > 第9条",
+          "rrf_score": 0.009804,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#9",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第2章 採用、異動等 > (休職) > 第9条",
+          "rrf_score": 0.009709,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#8",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第2章 採用、異動等 > (人事異動) > 第8条",
+          "rrf_score": 0.009615,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#8",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第2章 採用、異動等 > (人事異動) > 第8条",
+          "rrf_score": 0.009524,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#8",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第2章 採用、異動等 > (人事異動) > 第8条",
+          "rrf_score": 0.009434,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/休暇規程.docx#6",
+          "doc_id": "株式会社サクラベース/休暇規程.docx",
+          "label": "(育児・介護休業、子の看護等休暇等) > 第28条",
+          "rrf_score": 0.009346,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/メモ_final_v2.md#2",
+          "doc_id": "共有フォルダ（未整理）/メモ_final_v2.md",
+          "label": "第28条（育児・介護休業、子の看護休暇等）",
+          "rrf_score": 0.009174,
+          "reason": "検索上位",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/就業規則.docx#24",
+          "doc_id": "株式会社サクラベース/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.004615,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        },
+        {
+          "chunk_id": "共有フォルダ（未整理）/就業規則.docx#24",
+          "doc_id": "共有フォルダ（未整理）/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.004545,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/就業規則.docx#24",
+          "doc_id": "サクラベース・ロジスティクス株式会社/就業規則.docx",
+          "label": "第4章 労働時間、休憩及び休日 > (時間外及び休日労働等) > 第21条",
+          "rrf_score": 0.004478,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/雇用契約書_ひな形.md#5",
+          "doc_id": "株式会社サクラベース/雇用契約書_ひな形.md",
+          "label": "雇用契約書（ひな形） > 第5条（時間外労働）",
+          "rrf_score": 0.004412,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#10",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(1年単位の変形労働時間制に関する賃金の精算) > 第41条",
+          "rrf_score": 0.004348,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#10",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(1年単位の変形労働時間制に関する賃金の精算) > 第41条",
+          "rrf_score": 0.004286,
+          "reason": "意味検索の上位（救済枠）",
+          "linked": false
+        }
+      ],
+      "stage2_scores": {
+        "株式会社サクラベース/賃金規程.docx#9": 1.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#9": 1.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#2": 0.8,
+        "株式会社サクラベース/賃金規程.docx#2": 0.8,
+        "株式会社サクラベース/賃金規程.docx#11": 0.8,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#11": 1.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#7": 0.0,
+        "株式会社サクラベース/賃金規程.docx#7": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#18": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#21": 0.0,
+        "株式会社サクラベース/休暇規程.docx#2": 0.0,
+        "株式会社サクラベース/就業規則.docx#21": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#18": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#21": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#2": 0.0,
+        "株式会社サクラベース/就業規則.docx#18": 0.0,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#17": 0.0,
+        "株式会社サクラベース/賃金規程.docx#17": 0.0,
+        "契約書/業務委託契約書_合同会社ミナトデザイン.md#4": 0.8,
+        "株式会社サクラベース/就業規則.docx#13": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#13": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#13": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#3": 0.0,
+        "株式会社サクラベース/休暇規程.docx#3": 0.0,
+        "株式会社サクラベース/就業規則.docx#6": 0.0,
+        "株式会社サクラベース/雇用契約書_ひな形.md#6": 0.2,
+        "共有フォルダ（未整理）/就業規則.docx#6": 0.0,
+        "株式会社サクラベース/賃金規程.docx#0": 1.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#6": 0.0,
+        "株式会社サクラベース/就業規則.docx#20": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#20": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#20": 0.0,
+        "契約書/業務委託契約書_合同会社ミナトデザイン.md#3": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#7": 0.0,
+        "株式会社サクラベース/休暇規程.docx#7": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#5": 0.0,
+        "株式会社サクラベース/就業規則.docx#5": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#5": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#6": 0.0,
+        "契約書/業務委託契約書_合同会社ミナトデザイン.md#2": 0.0,
+        "サクラベース・ロジスティクス株式会社/休暇規程.docx#5": 0.0,
+        "株式会社サクラベース/休暇規程.docx#5": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#9": 0.0,
+        "株式会社サクラベース/就業規則.docx#9": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#9": 0.0,
+        "共有フォルダ（未整理）/就業規則.docx#8": 0.0,
+        "株式会社サクラベース/就業規則.docx#8": 0.0,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#8": 0.0,
+        "株式会社サクラベース/休暇規程.docx#6": 0.0,
+        "共有フォルダ（未整理）/メモ_final_v2.md#2": 0.0,
+        "株式会社サクラベース/就業規則.docx#24": 0.1,
+        "共有フォルダ（未整理）/就業規則.docx#24": 0.2,
+        "サクラベース・ロジスティクス株式会社/就業規則.docx#24": 0.2,
+        "株式会社サクラベース/雇用契約書_ひな形.md#5": 0.2,
+        "サクラベース・ロジスティクス株式会社/賃金規程.docx#10": 0.5,
+        "株式会社サクラベース/賃金規程.docx#10": 0.5
+      },
+      "findings": [
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#9",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(割増賃金) > 第40条",
+          "document_nature": "就業規則の一部である賃金規程",
+          "law_applicability": "applicable",
+          "applicability_reason": "賃金規程は労働基準法第37条の割増賃金規制の適用を受ける社内規定である。本規程は月60時間超の時間外労働について25%の割増率を定めているが、これは中小事業主に対する猶予措置（附則第138条）を前提とした規定であり、当該猶予規定が削除されることで規程全体が改正後の労基法第37条第1項ただし書（60時間超は50%以上）に抵触する",
+          "impact": "affected",
+          "deadline_type": "immediate",
+          "evidence_quote": "③ 60時間超：25%",
+          "evidence_location": "第6章 賃金 > 第40条(割増賃金)",
+          "fix_proposal": {
+            "before": "③ 60時間超：25%",
+            "after": "③ 60時間超：50%"
+          },
+          "confidence": 0.92,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#9",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(割増賃金) > 第40条",
+          "document_nature": "就業規則の一部である賃金規程（社内規定）",
+          "law_applicability": "not_applicable",
+          "applicability_reason": "本規程は既に月60時間超の時間外労働について50%の割増賃金率を定めており、中小事業主に対する猶予措置（附則138条）を適用せず現行本則（37条1項ただし書）どおりの運用をしている。附則138条の削除は猶予措置の廃止であり、既に50%を適用している本規程の記述には変更の影響が生じない",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.85,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "global.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#11",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(代替休暇) > 第42条",
+          "document_nature": "賃金規程（就業規則の一部、社内規定）",
+          "law_applicability": "applicable",
+          "applicability_reason": "この文書は労働者の賃金・割増賃金・代替休暇に関する社内規定であり、労働基準法第37条の割増賃金規制および代替休暇制度が直接適用される。附則第138条は中小事業主に対する月60時間超の割増賃金率50%以上の適用猶予を定めていたが、これが削除されることで、中小事業主も含めすべての事業主に月60時間超の割増賃金率50%以上が適用される（大企業は既に2010年から適用済み、中小企業は2023年4月から既に適用開始済みだが、附則自体は残存していた）。本規程は既に50%の割増率を前提とした代替休暇制度を規定しているため、規定内容自体は現行法に適合しているが、法的根拠条文の整理という観点では影響がある",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#0",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "株式会社サクラベース/賃金規程.docx",
+          "document_nature": "就業規則の一部である賃金規程",
+          "law_applicability": "unclear",
+          "applicability_reason": "提示された該当箇所は章タイトルと第33条見出しのみであり、時間外労働の割増賃金率や中小事業主の適用猶予に関する具体的な規定内容が含まれていない。実際に月60時間超の時間外労働に対する割増賃金率が50%未満で定められているかどうかがこの抜粋からは判断できない",
+          "impact": "not_applicable",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.3,
+          "needs_human_review": true,
+          "review_reason": "法令の適用可否が判断できていません / 確信度が低い（0.3）",
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#2",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(賃金の構成) > 第33条",
+          "document_nature": "就業規則の一部である賃金規程",
+          "law_applicability": "unclear",
+          "applicability_reason": "該当箇所は賃金の構成項目（基本給、各種手当、時間外・休日・深夜労働割増賃金の区分）を列挙しているのみで、月60時間超の時間外労働に対する割増賃金率の具体的な数値や中小事業主の猶予規定への言及がない。この条文自体は影響を受けないが、賃金規程内に別途、割増賃金率を定める条文（猶予措置に基づく25%等の記載）が存在する可能性があり、そちらが本来の確認対象となる",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.7,
+          "needs_human_review": true,
+          "review_reason": "法令の適用可否が判断できていません",
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#2",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(賃金の構成) > 第33条",
+          "document_nature": "就業規則の一部である賃金規程",
+          "law_applicability": "applicable",
+          "applicability_reason": "賃金規程は労働基準法が適用される労働者への賃金支払いに関する社内規則であり、時間外労働割増賃金の定めが含まれるため、月60時間超の時間外労働に対する割増賃金率規制（労基法37条1項ただし書）およびその中小企業猶予措置（附則138条）の適用対象となる",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "┌ 時間外労働割増賃金 ├ 休日労働割増賃金 └ 深夜労働割増賃金",
+          "evidence_location": "第33条(賃金の構成)",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#11",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(代替休暇) > 第42条",
+          "document_nature": "就業規則（賃金規程）",
+          "law_applicability": "applicable",
+          "applicability_reason": "本規程は月60時間超の時間外労働に対する50%以上の割増賃金率を前提とした代替休暇制度を定めており、労働基準法第37条第1項ただし書（月60時間超の割増賃金率50%以上）の適用を受ける使用者に適用される規定である。附則138条の中小事業主猶予措置が削除されることで、これまで適用猶予されていた中小事業主にも50%の割増率および代替休暇制度（第37条第3項）が適用されることになる。この賃金規程はすでに50%の率を前提として代替休暇制度を規定しているため、猶予対象の中小事業主であった場合、法改正によりこの規定が正式に法的根拠を持つことになる一方、もし従来猶予を受けて25%等の率を別途運用していた実態があれば整合性の確認が必要となる",
+          "impact": "affected",
+          "deadline_type": "immediate",
+          "evidence_quote": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+          "evidence_location": "第6章 賃金 > 第42条（代替休暇）",
+          "fix_proposal": {
+            "before": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+            "after": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 25% ＝ 25% )　※中小事業主も含め全事業主に月60時間超の割増賃金率50%以上が適用されることを前提に、通常の時間外割増率（25%）との差分を明記"
+          },
+          "confidence": 0.55,
+          "needs_human_review": true,
+          "review_reason": "確信度が低い（0.55）",
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md#4",
+          "doc_id": "契約書/業務委託契約書_合同会社ミナトデザイン.md",
+          "label": "業務委託契約書 > 第4条（報酬）",
+          "document_nature": "業務委託契約書",
+          "law_applicability": "not_applicable",
+          "applicability_reason": "本契約は甲乙間の業務委託契約であり、乙（合同会社）は受託者として独立した事業者であって労働基準法上の労働者ではない。第3条でも乙の裁量による作業時間・作業日の決定が明記されており、指揮命令関係が否定されている。したがって、時間外労働に対する割増賃金率を定めた労働基準法第37条及びその適用猶予に関する附則第138条はいずれも本契約に適用されない。",
+          "impact": "not_applicable",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.9,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#10",
+          "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+          "label": "(1年単位の変形労働時間制に関する賃金の精算) > 第41条",
+          "document_nature": "就業規則の一部である賃金規程（社内規定）",
+          "law_applicability": "applicable",
+          "applicability_reason": "本文書は労働者に適用される賃金規程であり、月60時間超の時間外労働に対する割増賃金率（50%以上）は労働基準法第37条第1項ただし書の規制対象。この文書内には附則第138条の適用猶予に関する明示規定は第41条自体には含まれないが、前後の文脈（時間外割増60h超の計算式で1.50を使用、代替休暇制度）から、既に大企業向けの50%以上の割増率が適用されていることが確認できる。第41条自体は1年単位の変形労働時間制における清算規定であり、附則第138条の猶予規定とは直接関係しない",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "jp.anthropic.claude-sonnet-5"
+        },
+        {
+          "chunk_id": "株式会社サクラベース/賃金規程.docx#10",
+          "doc_id": "株式会社サクラベース/賃金規程.docx",
+          "label": "(1年単位の変形労働時間制に関する賃金の精算) > 第41条",
+          "document_nature": "就業規則の一部である賃金規程",
+          "law_applicability": "applicable",
+          "applicability_reason": "賃金規程は労働基準法第37条の割増賃金規制の適用対象であり、既に月60時間超の時間外労働について50%の割増率を採用していることが前後の文脈（第41条前後の計算式・第42条の代替休暇規定）から確認できる。今回の法改正は中小事業主に対する適用猶予（附則138条）を削除するものであり、本規程がこの猶予規定に依拠した記述を含んでいないかを確認する必要がある",
+          "impact": "none",
+          "deadline_type": "none",
+          "evidence_quote": "",
+          "evidence_location": "",
+          "fix_proposal": null,
+          "confidence": 0.75,
+          "needs_human_review": false,
+          "review_reason": null,
+          "evidence_verified": true,
+          "model": "global.anthropic.claude-sonnet-5"
+        }
+      ],
+      "funnel": {
+        "total_chunks": 171,
+        "stage1_passed": 56,
+        "stage2_passed": 10,
+        "stage3_judged": 10,
+        "affected": 2,
+        "not_affected": 8,
+        "stage1_excluded": 115
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "doc_id": "株式会社サクラベース/賃金規程.docx",
+      "location": "demo-data/監視対象/株式会社サクラベース/賃金規程.docx",
+      "chunk_id": "株式会社サクラベース/賃金規程.docx#9",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "株式会社サクラベース/賃金規程.docx#9",
+        "doc_id": "株式会社サクラベース/賃金規程.docx",
+        "label": "(割増賃金) > 第40条",
+        "document_nature": "就業規則の一部である賃金規程",
+        "law_applicability": "applicable",
+        "applicability_reason": "賃金規程は労働基準法第37条の割増賃金規制の適用を受ける社内規定である。本規程は月60時間超の時間外労働について25%の割増率を定めているが、これは中小事業主に対する猶予措置（附則第138条）を前提とした規定であり、当該猶予規定が削除されることで規程全体が改正後の労基法第37条第1項ただし書（60時間超は50%以上）に抵触する",
+        "impact": "affected",
+        "deadline_type": "immediate",
+        "evidence_quote": "③ 60時間超：25%",
+        "evidence_location": "第6章 賃金 > 第40条(割増賃金)",
+        "fix_proposal": {
+          "before": "③ 60時間超：25%",
+          "after": "③ 60時間超：50%"
+        },
+        "confidence": 0.92,
+        "needs_human_review": false,
+        "review_reason": null,
+        "evidence_verified": true,
+        "model": "jp.anthropic.claude-sonnet-5"
+      }
+    },
+    {
+      "doc_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx",
+      "location": "demo-data/監視対象/サクラベース・ロジスティクス株式会社/賃金規程.docx",
+      "chunk_id": "サクラベース・ロジスティクス株式会社/賃金規程.docx#11",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "株式会社サクラベース/賃金規程.docx#11",
+        "doc_id": "株式会社サクラベース/賃金規程.docx",
+        "label": "(代替休暇) > 第42条",
+        "document_nature": "就業規則（賃金規程）",
+        "law_applicability": "applicable",
+        "applicability_reason": "本規程は月60時間超の時間外労働に対する50%以上の割増賃金率を前提とした代替休暇制度を定めており、労働基準法第37条第1項ただし書（月60時間超の割増賃金率50%以上）の適用を受ける使用者に適用される規定である。附則138条の中小事業主猶予措置が削除されることで、これまで適用猶予されていた中小事業主にも50%の割増率および代替休暇制度（第37条第3項）が適用されることになる。この賃金規程はすでに50%の率を前提として代替休暇制度を規定しているため、猶予対象の中小事業主であった場合、法改正によりこの規定が正式に法的根拠を持つことになる一方、もし従来猶予を受けて25%等の率を別途運用していた実態があれば整合性の確認が必要となる",
+        "impact": "affected",
+        "deadline_type": "immediate",
+        "evidence_quote": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+        "evidence_location": "第6章 賃金 > 第42条（代替休暇）",
+        "fix_proposal": {
+          "before": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+          "after": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 25% ＝ 25% )　※中小事業主も含め全事業主に月60時間超の割増賃金率50%以上が適用されることを前提に、通常の時間外割増率（25%）との差分を明記"
+        },
+        "confidence": 0.55,
+        "needs_human_review": true,
+        "review_reason": "確信度が低い（0.55）",
+        "evidence_verified": true,
+        "model": "jp.anthropic.claude-sonnet-5"
+      }
+    },
+    {
+      "doc_id": "株式会社サクラベース/賃金規程.docx",
+      "location": "demo-data/監視対象/株式会社サクラベース/賃金規程.docx",
+      "chunk_id": "株式会社サクラベース/賃金規程.docx#11",
+      "change_id": "chg-001",
+      "finding": {
+        "chunk_id": "株式会社サクラベース/賃金規程.docx#11",
+        "doc_id": "株式会社サクラベース/賃金規程.docx",
+        "label": "(代替休暇) > 第42条",
+        "document_nature": "就業規則（賃金規程）",
+        "law_applicability": "applicable",
+        "applicability_reason": "本規程は月60時間超の時間外労働に対する50%以上の割増賃金率を前提とした代替休暇制度を定めており、労働基準法第37条第1項ただし書（月60時間超の割増賃金率50%以上）の適用を受ける使用者に適用される規定である。附則138条の中小事業主猶予措置が削除されることで、これまで適用猶予されていた中小事業主にも50%の割増率および代替休暇制度（第37条第3項）が適用されることになる。この賃金規程はすでに50%の率を前提として代替休暇制度を規定しているため、猶予対象の中小事業主であった場合、法改正によりこの規定が正式に法的根拠を持つことになる一方、もし従来猶予を受けて25%等の率を別途運用していた実態があれば整合性の確認が必要となる",
+        "impact": "affected",
+        "deadline_type": "immediate",
+        "evidence_quote": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+        "evidence_location": "第6章 賃金 > 第42条（代替休暇）",
+        "fix_proposal": {
+          "before": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 35% ＝ 15% )",
+          "after": "（図1）代替休暇時間の算定 代替休暇時間 ＝ [ 1か月の60h超時間外労働時間 ] × 換算率 ( 50% － 25% ＝ 25% )　※中小事業主も含め全事業主に月60時間超の割増賃金率50%以上が適用されることを前提に、通常の時間外割増率（25%）との差分を明記"
+        },
+        "confidence": 0.55,
+        "needs_human_review": true,
+        "review_reason": "確信度が低い（0.55）",
+        "evidence_verified": true,
+        "model": "jp.anthropic.claude-sonnet-5"
+      }
+    }
+  ],
+  "cost": {
+    "calls": 67,
+    "total_tokens": 55655,
+    "cost_usd": 0.10064559999999999,
+    "by_model": {
+      "google/gemini-3.5-flash": {
+        "calls": 1,
+        "prompt_tokens": 799,
+        "completion_tokens": 1355,
+        "cost_usd": 0.0133935
+      },
+      "google/gemini-3.5-flash-lite": {
+        "calls": 56,
+        "prompt_tokens": 27822,
+        "completion_tokens": 583,
+        "cost_usd": 0.0098041
+      },
+      "anthropic/claude-sonnet-5": {
+        "calls": 10,
+        "prompt_tokens": 21689,
+        "completion_tokens": 3407,
+        "cost_usd": 0.07744799999999999
+      }
+    },
+    "cache": {
+      "hits": 0,
+      "misses": 10
+    }
+  }
+}
