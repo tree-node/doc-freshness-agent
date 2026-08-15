@@ -80,7 +80,11 @@ def run_check(
     """1つの正本をチェックする。変更があれば判定まで走らせて結果を保存する。"""
     index_dir = index_dir or settings.snapshots_dir.parent / "index"
     if not (index_dir / "chunks.json").exists():
-        raise NotReadyError("監視対象がまだ取り込まれていません（先に取り込みが必要です）")
+        raise NotReadyError(
+            "監視対象がまだ取り込まれていません。"
+            "ターミナルで `python -m app.cli ingest` を実行してください"
+            "（demo-data/監視対象 を読み込みます）"
+        )
 
     index = ChunkIndex.load(index_dir)
     locations_path = index_dir / "locations.json"

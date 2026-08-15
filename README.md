@@ -81,11 +81,17 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# 4. フロントエンド（別ターミナル）
+# 4. デモを動かせる状態を作る（正本の取得＋監視対象の取り込み。1〜2分）
+python scripts/setup_demo.py
+
+# 5. フロントエンド（別ターミナル）
 cd frontend
 npm install
 npm run dev
 ```
+
+`data/` 配下（スナップショット・索引・検知結果）はリポジトリに含めていません。
+**各自の環境で作れることを確かめられるように**、生成物は配らず手順を配る方針です。
 
 起動後、`http://localhost:5173` を開き、設定画面から正本（法令）と監視対象フォルダを登録してください。デモ用データは `demo-data/` にあります。
 

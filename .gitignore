@@ -77,3 +77,4 @@ Thumbs.db
 .claude/settings.local.json
 data/results/
 data/history.jsonl
+data/outputs/
