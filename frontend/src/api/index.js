@@ -11,7 +11,9 @@ export {
   fetchHistory,
   fetchRules,
   fetchStatuses,
+  registerRule,
   saveStatus,
+  searchLaws,
   setRuleEnabled,
 } from './client.js';
 export { buildDocTree, buildReflist, buildFunnelView, changeTabLabel } from './derive.js';

@@ -216,3 +216,29 @@ export async function setRuleEnabled(lawId, enabled) {
   }
   return res.json();
 }
+
+/** 法令をキーワードで探す（登録時に法令IDを知らなくて済むように）。 */
+export async function searchLaws(query) {
+  const res = await fetch(`/api/laws?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error(await errorDetail(res, '法令を検索できませんでした'));
+  return (await res.json()).laws ?? [];
+}
+
+/** 正本を登録する。指定した時点の条文を取ってきて、比較の出発点として保存する。 */
+export async function registerRule(lawId, asof) {
+  const res = await fetch('/api/rules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ law_id: lawId, asof: asof || null }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res, '登録できませんでした'));
+  return res.json();
+}
+
+async function errorDetail(res, fallback) {
+  try {
+    return (await res.json()).detail ?? `${fallback}（HTTP ${res.status}）`;
+  } catch {
+    return `${fallback}（HTTP ${res.status}）`;
+  }
+}

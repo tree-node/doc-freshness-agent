@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AddRuleForm from '../components/AddRuleForm.jsx';
 import { fetchRules, setRuleEnabled } from '../api/index.js';
 
 /**
@@ -8,7 +9,7 @@ import { fetchRules, setRuleEnabled } from '../api/index.js';
  * 再開すると戻る——正本と社内文書の依存関係が目に見える。
  * **止めても検知結果や判断は消さない**（見るのをやめるだけ）。
  *
- * 正本の新規登録はこの画面では行わない（デモでは事前登録済み。DESIGN.md 画面構成）。
+ * 正本の追加もここから行える（法令名で探して、いつ時点の条文を出発点にするかを選ぶ）。
  */
 export default function SettingsScreen() {
   const [rules, setRules] = useState(null);
@@ -87,9 +88,7 @@ export default function SettingsScreen() {
             </button>
           </div>
         ))}
-        <div className="border-t border-dashed border-[var(--line)] px-5 py-3.5 text-[13px] text-[var(--sub)]">
-          ＋ ルールを追加（この画面からの登録は未実装です）
-        </div>
+        <AddRuleForm onRegistered={async () => setRules(await fetchRules())} />
       </div>
 
       <div className="mb-3 text-[13px] font-bold tracking-wider text-[var(--sub)]">チェックする文書</div>

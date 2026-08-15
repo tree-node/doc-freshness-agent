@@ -395,3 +395,109 @@ def test_stopping_a_rule_does_not_delete_the_result(results_dir: Path, snapshots
 
 def test_stopping_an_unregistered_rule_is_404(snapshots_dir: Path) -> None:
     assert client.put("/api/rules/存在しない", json={"enabled": False}).status_code == 404
+
+
+# --- 正本の検索と登録 ---------------------------------------------------------
+
+
+class FakeEGov:
+    """e-Gov に通信しない差し替え。テストはネットワークに出ない。"""
+
+    def __init__(self, laws=None, snapshot=None, error=None):
+        self.laws = laws or []
+        self.snapshot = snapshot
+        self.error = error
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return None
+
+    def search_laws(self, law_title, limit=20):
+        if self.error:
+            raise self.error
+        return self.laws
+
+    def get_law_data(self, law_id, asof=None, elm=None):
+        if self.error:
+            raise self.error
+        return self.snapshot
+
+
+def a_law(law_id="322AC0000000049", title="労働基準法", law_type="Act"):
+    return {
+        "law_info": {"law_id": law_id, "law_num": "昭和二十二年法律第四十九号", "law_type": law_type},
+        "revision_info": {"law_title": title},
+    }
+
+
+def a_law_data(law_id="322AC0000000049", title="労働基準法"):
+    return {
+        "revision_info": {
+            "law_revision_id": f"{law_id}_20190401",
+            "law_title": title,
+            "amendment_enforcement_date": "2019-04-01",
+        },
+        "law_full_text": {
+            "Law": {
+                "LawBody": {
+                    "MainProvision": {
+                        "Chapter": [
+                            {
+                                "ChapterTitle": ["第四章　労働時間"],
+                                "Article": [{"ArticleTitle": "第三十六条", "Paragraph": [{"Num": "1"}]}],
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+    }
+
+
+def test_search_laws_returns_candidates(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    monkeypatch.setattr(api, "egov_client", lambda: FakeEGov(laws=[a_law()]))
+    body = client.get("/api/laws", params={"q": "労働基準法"}).json()
+    assert body["laws"][0]["law_id"] == "322AC0000000049"
+    assert body["laws"][0]["law_type"] == "Act"
+
+
+def test_search_marks_already_registered_laws(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    """登録済みのものが分かるようにする（同じ正本を二重に登録させない）。"""
+    monkeypatch.setattr(
+        api, "egov_client", lambda: FakeEGov(laws=[a_law(law_id="403AC0000000076", title="育児・介護休業法")])
+    )
+    assert client.get("/api/laws", params={"q": "育児"}).json()["laws"][0]["registered"] is True
+
+
+def test_registers_a_law_and_saves_the_snapshot(
+    monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path
+) -> None:
+    monkeypatch.setattr(api, "egov_client", lambda: FakeEGov(snapshot=a_law_data()))
+    res = client.post("/api/rules", json={"law_id": "322AC0000000049", "asof": "2019-03-01"})
+
+    assert res.status_code == 200
+    assert res.json()["law_title"] == "労働基準法"
+    assert res.json()["provisions"] > 0
+    assert (snapshots_dir / "322AC0000000049.json").exists()
+
+    titles = [r["law_title"] for r in client.get("/api/rules").json()["rules"]]
+    assert "労働基準法" in titles
+
+
+def test_registering_the_same_law_twice_is_rejected(
+    monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path
+) -> None:
+    monkeypatch.setattr(api, "egov_client", lambda: FakeEGov(snapshot=a_law_data(law_id="403AC0000000076")))
+    res = client.post("/api/rules", json={"law_id": "403AC0000000076"})
+    assert res.status_code == 409
+
+
+def test_an_unknown_law_id_is_reported(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    from app.egov import EGovError
+
+    monkeypatch.setattr(api, "egov_client", lambda: FakeEGov(error=EGovError("404 見つかりません")))
+    res = client.post("/api/rules", json={"law_id": "存在しないID"})
+    assert res.status_code == 422
+    assert "取得できませんでした" in res.json()["detail"]

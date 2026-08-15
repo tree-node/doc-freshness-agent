@@ -19,6 +19,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.config import settings
+from app.egov import EGovClient, EGovError, fetch_snapshot, snapshot_path
 from app.history import load_checks
 from app.proposal import edits_from_result, generate_revised_document
 from app.sources.local import UnsupportedFormatError
@@ -60,6 +61,11 @@ def outputs_dir() -> Path:
 
 def db_path() -> Path:
     return settings.db_path
+
+
+def egov_client() -> EGovClient:
+    """e-Gov クライアント。テストからはここを差し替える（テストは通信しない）。"""
+    return EGovClient()
 
 
 def _load_results(directory: Path | None = None) -> list[dict[str, Any]]:
@@ -250,6 +256,72 @@ def list_rules() -> dict[str, Any]:
 
 class RuleUpdate(BaseModel):
     enabled: bool
+
+
+class RuleCreate(BaseModel):
+    """正本の登録。asof は「いつ時点の条文を出発点にするか」。
+
+    省略すると現在の条文で登録する（＝これ以降の改正だけを検知する）。
+    デモのように過去に遡って検知させたい場合は日付を指定する。
+    """
+
+    law_id: str
+    asof: str | None = None
+
+
+@router.get("/laws")
+def search_laws(q: str, limit: int = 10) -> dict[str, Any]:
+    """法令をキーワードで探す。登録するとき法令IDを知らなくて済むように。
+
+    **法令名の部分一致なので同名の別法令が混ざる**（育介法を探すと船員向けの
+    施行規則も出る）ので、法令の種類も一緒に返して選べるようにする。
+    """
+    try:
+        with egov_client() as client:
+            found = client.search_laws(q, limit=limit)
+    except EGovError as exc:
+        raise HTTPException(status_code=502, detail=f"法令の検索に失敗しました: {exc}") from exc
+
+    registered = {snapshot["law_id"] for snapshot in _load_snapshots()}
+    return {
+        "laws": [
+            {
+                "law_id": law["law_info"]["law_id"],
+                "law_title": law["revision_info"]["law_title"],
+                "law_num": law["law_info"]["law_num"],
+                "law_type": law["law_info"]["law_type"],
+                "registered": law["law_info"]["law_id"] in registered,
+            }
+            for law in found
+        ]
+    }
+
+
+@router.post("/rules")
+def create_rule(payload: RuleCreate) -> dict[str, Any]:
+    """正本を登録する。指定時点の条文を取ってきて、比較の出発点として保存する。
+
+    これ以降のチェックで、保存した条文と現在の条文の差分が「法令の変更」になる。
+    """
+    directory = snapshots_dir()
+    if (directory / f"{payload.law_id}.json").exists():
+        raise HTTPException(status_code=409, detail=f"すでに登録されています: {payload.law_id}")
+
+    try:
+        with egov_client() as client:
+            snapshot = fetch_snapshot(client, payload.law_id, asof=payload.asof)
+    except EGovError as exc:
+        raise HTTPException(status_code=422, detail=f"法令を取得できませんでした: {exc}") from exc
+
+    snapshot.save(snapshot_path(directory, payload.law_id))
+    return {
+        "law_id": snapshot.law_id,
+        "law_title": snapshot.law_title,
+        "watching_since": payload.asof,
+        "revision": snapshot.law_revision_id,
+        "provisions": len(snapshot.provisions),
+        "enabled": True,
+    }
 
 
 @router.put("/rules/{law_id}")
