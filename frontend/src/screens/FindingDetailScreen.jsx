@@ -121,7 +121,22 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
           )}
         </div>
 
+        {/* 左に「どう直すか」、右に「なぜ直すのか」を置く */}
         <div className="grid grid-cols-1 items-start gap-4.5 lg:grid-cols-2">
+          <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
+            <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">修正の提案</h4>
+            {finding.fix_proposal ? (
+              <>
+                <div className="mb-1.5 rounded-lg bg-[#FAF7F4] px-3 py-2 text-[13px] text-[var(--sub)] line-through decoration-[var(--shu)]">
+                  {finding.fix_proposal.before}
+                </div>
+                <div className="rounded-lg bg-[var(--green-soft)] px-3 py-2 text-[13px]">{finding.fix_proposal.after}</div>
+              </>
+            ) : (
+              <p className="text-[13px] text-[var(--sub)]">自動生成の修正案はありません。内容を確認のうえ、対応方針をご検討ください。</p>
+            )}
+          </div>
+
           <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
             <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">なぜ対応が必要か</h4>
             <p className="mb-2 text-[13px]">{finding.applicability_reason}</p>
@@ -139,25 +154,11 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
               改正条文の原文（e-Gov）↗
             </a>
           </div>
-
-          <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
-            <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">修正の提案</h4>
-            {finding.fix_proposal ? (
-              <>
-                <div className="mb-1.5 rounded-lg bg-[#FAF7F4] px-3 py-2 text-[13px] text-[var(--sub)] line-through decoration-[var(--shu)]">
-                  {finding.fix_proposal.before}
-                </div>
-                <div className="rounded-lg bg-[var(--green-soft)] px-3 py-2 text-[13px]">{finding.fix_proposal.after}</div>
-              </>
-            ) : (
-              <p className="text-[13px] text-[var(--sub)]">自動生成の修正案はありません。内容を確認のうえ、対応方針をご検討ください。</p>
-            )}
-          </div>
         </div>
 
         {/* 全幅だとボタンが間延びするので、幅を抑えて中央に置く */}
         <div className="mx-auto w-full max-w-lg rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
-          <h4 className="mb-2.5 text-center text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
+          <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
           <div className="flex flex-wrap gap-2">
             {STATUSES.map((s) => (
               <button
