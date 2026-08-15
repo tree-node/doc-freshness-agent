@@ -74,12 +74,15 @@ def main() -> int:
     print("=" * 66)
     print("\n  uvicorn app.main:app --port 8000")
     print("  cd frontend && npm run dev")
-    print("\n指摘を出すには、変更を1つ選んで判定まで走らせてください")
+    print("\n次に、指摘を出すために下の2つを実行してください")
     print("（1件あたり2〜3分・$0.05〜0.12 かかります）:\n")
     for law_id, change, name in DEMO_RUNS:
         print(f"  python -m app.cli run {law_id} --change-filter {change}")
         print(f"      → {name}")
-    print("\n画面の「今すぐチェック」からも同じことができます。")
+    print("\n※ 先に画面の「今すぐチェック」を押さないでください。")
+    print("   前に見た変更が記録されていないと、41件の中から先頭の1件を選んでしまい")
+    print("   （時間の歯止めのため）、社内文書と関係のない条を見ることになります。")
+    print("   上の2つを一度流したあとなら、ボタンは同じ変更を見に行きます。")
     return 0
 
 

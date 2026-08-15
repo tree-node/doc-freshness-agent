@@ -121,9 +121,17 @@ def run_check(
     # 条件が分からないときは全件流さない。時間と費用の歯止め
     if not change_filter and len(event.diffs) > MAX_CHANGES_WITHOUT_FILTER:
         max_changes = MAX_CHANGES_WITHOUT_FILTER
+        picked = "、".join(d.label.split(">")[-1].strip() for d in event.diffs[:max_changes])
+        # **どれを見ているかを必ず言う**。41件を1件に絞ったのに、その1件が何かを
+        # 伝えないと「動かなかった」と「関係ない条を見ていた」の区別が付かない。
+        # 並び順で選んでいるだけで、関係のありそうな変更を選んでいるわけではない
         report(
-            f"{total}件の変更が見つかりました。時間がかかるため、今回は{MAX_CHANGES_WITHOUT_FILTER}件だけ確認します"
-            "（残りはコマンドから実行できます）"
+            f"{total}件の変更が見つかりました。全部を見ると1〜2時間かかるため、"
+            f"今回は先頭の{max_changes}件（{picked}）だけ確認します"
+        )
+        report(
+            "見たい変更が決まっている場合は、コマンドで指定してください: "
+            f"python -m app.cli run {law_id} --change-filter 第◯◯条"
         )
 
     report(f"{len(event.diffs)}件の変更について、影響のある文書を探します…")
