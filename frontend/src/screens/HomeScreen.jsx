@@ -162,7 +162,9 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
               disabled={checking}
               onChange={(e) => setAllChanges(e.target.checked)}
             />
-            すべての変更を確認する（40〜60分かかります）
+            {/* 具体的な分数はここに書かない。変更の数で大きく変わるので、押した直後に
+                サーバーが実際の件数から見積もった数字を進捗の1行目に出す */}
+            すべての変更を確認する（時間がかかります。目安は実行直後に出します）
           </label>
         </div>
 
