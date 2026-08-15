@@ -76,8 +76,13 @@ def run_check(
     change_filter: str | None = None,
     max_changes: int | None = None,
     index_dir: Path | None = None,
+    all_changes: bool = False,
 ) -> dict[str, Any]:
-    """1つの正本をチェックする。変更があれば判定まで走らせて結果を保存する。"""
+    """1つの正本をチェックする。変更があれば判定まで走らせて結果を保存する。
+
+    `all_changes=True` で見つかった変更をすべて見る。時間と費用がかかるので、
+    呼び出し側が明示したときだけ。既定は歯止めが働く。
+    """
     index_dir = index_dir or settings.snapshots_dir.parent / "index"
     if not (index_dir / "chunks.json").exists():
         raise NotReadyError(
@@ -118,8 +123,15 @@ def run_check(
         else:
             report(f"前回見た変更が見つからなかったため、{total}件すべてを対象にします")
 
+    if all_changes:
+        # 1変更あたり約80秒・$0.05 の実測から見積もる（関係ない変更はStage 2で落ちるので
+        # 実際はこれより短く安く済む）
+        report(
+            f"{total}件の変更すべてを確認します。"
+            f"目安は {total * 80 // 60} 分ほど、費用は ${total * 0.05:.1f} 前後です"
+        )
     # 条件が分からないときは全件流さない。時間と費用の歯止め
-    if not change_filter and len(event.diffs) > MAX_CHANGES_WITHOUT_FILTER:
+    elif not change_filter and len(event.diffs) > MAX_CHANGES_WITHOUT_FILTER:
         max_changes = MAX_CHANGES_WITHOUT_FILTER
         picked = "、".join(d.label.split(">")[-1].strip() for d in event.diffs[:max_changes])
         # **どれを見ているかを必ず言う**。41件を1件に絞ったのに、その1件が何かを

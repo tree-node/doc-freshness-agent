@@ -346,6 +346,8 @@ class CheckRequest(BaseModel):
     """
 
     law_id: str | None = None
+    # 見つかった変更をすべて見るか。既定は歯止めが働いて先頭の1件だけ
+    all_changes: bool = False
 
 
 @router.post("/checks")
@@ -378,7 +380,13 @@ def start_check(payload: CheckRequest) -> dict[str, Any]:
         results = []
         for law_id in targets:
             results.append(
-                run_check(law_id, report, change_filter=previous_filter(law_id))
+                run_check(
+                    law_id,
+                    report,
+                    # 全件を見るときは前回の条件で絞らない
+                    change_filter=None if payload.all_changes else previous_filter(law_id),
+                    all_changes=payload.all_changes,
+                )
             )
         return {"checked": results}
 

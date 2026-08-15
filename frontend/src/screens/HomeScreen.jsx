@@ -77,6 +77,7 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
   const [checking, setChecking] = useState(false);
   const [checkLog, setCheckLog] = useState([]);
   const [checkError, setCheckError] = useState(null);
+  const [allChanges, setAllChanges] = useState(false);
 
   async function load() {
     const list = await fetchEvents();
@@ -100,7 +101,7 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
     setCheckError(null);
     setCheckLog(['チェックを始めます…']);
     try {
-      const job = await startCheck();
+      const job = await startCheck(null, { allChanges });
       const done = await pollCheck(job.job_id, (lines) => setCheckLog((prev) => [...prev, ...lines]));
       if (done.state === 'failed') {
         setCheckError(done.error);
@@ -154,6 +155,15 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
           >
             {checking ? 'チェック中…' : '今すぐチェック'}
           </button>
+          <label className="flex items-center gap-1.5 text-[12.5px] text-[var(--sub)]">
+            <input
+              type="checkbox"
+              checked={allChanges}
+              disabled={checking}
+              onChange={(e) => setAllChanges(e.target.checked)}
+            />
+            すべての変更を確認する（40〜60分かかります）
+          </label>
         </div>
 
         {(checking || checkLog.length > 0 || checkError) && (

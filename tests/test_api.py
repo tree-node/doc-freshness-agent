@@ -603,3 +603,33 @@ def test_previous_filter_falls_back_to_the_single_change(results_dir: Path) -> N
         assert checks.previous_filter("403AC0000000076") == "第十六条の二"
     finally:
         object.__setattr__(app.config.settings, "results_dir", original)
+
+
+def test_all_changes_is_passed_through(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    """「すべての変更を確認する」を選んだときは、前回の条件で絞らない。"""
+    seen = {}
+    monkeypatch.setattr(
+        api,
+        "run_check",
+        lambda law_id, report, **kw: seen.update(kw) or {"law_id": law_id},
+    )
+    client.post("/api/checks", json={"law_id": "403AC0000000076", "all_changes": True})
+    for _ in range(50):
+        if seen:
+            break
+        time.sleep(0.05)
+    assert seen["all_changes"] is True
+    assert seen["change_filter"] is None
+
+
+def test_check_defaults_to_the_safe_path(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    seen = {}
+    monkeypatch.setattr(
+        api, "run_check", lambda law_id, report, **kw: seen.update(kw) or {"law_id": law_id}
+    )
+    client.post("/api/checks", json={"law_id": "403AC0000000076"})
+    for _ in range(50):
+        if seen:
+            break
+        time.sleep(0.05)
+    assert seen["all_changes"] is False

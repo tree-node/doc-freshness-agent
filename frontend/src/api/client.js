@@ -244,11 +244,11 @@ async function errorDetail(res, fallback) {
 }
 
 /** チェックを始める。すぐ受付だけ返るので、進捗は pollCheck で追う。 */
-export async function startCheck(lawId) {
+export async function startCheck(lawId, { allChanges = false } = {}) {
   const res = await fetch('/api/checks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ law_id: lawId ?? null }),
+    body: JSON.stringify({ law_id: lawId ?? null, all_changes: allChanges }),
   });
   if (!res.ok) throw new Error(await errorDetail(res, 'チェックを始められませんでした'));
   return res.json();
