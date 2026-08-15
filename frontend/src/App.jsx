@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { currentRoute, toPath } from './router.js';
 import Sidebar from './components/Sidebar.jsx';
 import AuditLogScreen from './screens/AuditLogScreen.jsx';
 import HistoryScreen from './screens/HistoryScreen.jsx';
@@ -7,32 +8,31 @@ import SettingsScreen from './screens/SettingsScreen.jsx';
 import EventDetailScreen from './screens/EventDetailScreen.jsx';
 import FindingDetailScreen from './screens/FindingDetailScreen.jsx';
 
-// 画面の行き来はルーティングライブラリを足さず、画面状態の切り替えで実装する
-// （DESIGN.md「リッチな作り込みはしない」）。ただしブラウザの「戻る」は使われるので、
-// 履歴には積んでおく——積まないと、戻った瞬間にアプリの外へ出てしまう。
-const HOME = { screen: 'home' };
-
+// 画面の行き来は URL で表す（router.js）。ルーティングライブラリは足していない。
+// URLが正になるので、再読み込みしても同じ画面に戻り、リンクを人に渡せる。
 export default function App() {
-  const [nav, setNav] = useState(HOME);
+  const [nav, setNav] = useState(currentRoute);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [nav]);
 
-  // 「戻る」で1つ前の画面に戻す
+  // 「戻る」「進む」は URL を読み直す（履歴に積んだ状態ではなく URL を正とする）
   useEffect(() => {
-    window.history.replaceState(HOME, '');
-    const onPop = (e) => setNav(e.state ?? HOME);
+    const onPop = () => setNav(currentRoute());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const go = (next) => {
-    window.history.pushState(next, '');
+  const go = useCallback((next) => {
+    const path = toPath(next);
+    if (path !== window.location.pathname + window.location.search) {
+      window.history.pushState(null, '', path);
+    }
     setNav(next);
-  };
+  }, []);
 
-  const goHome = () => go(HOME);
+  const goHome = () => go({ screen: 'home' });
   const goTo = (screen) => go({ screen });
   const goEvent = (eventId, changeId) => go({ screen: 'event', eventId, changeId });
   const goFinding = (eventId, changeId, chunkId) => go({ screen: 'finding', eventId, changeId, chunkId });
