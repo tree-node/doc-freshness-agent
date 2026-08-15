@@ -104,7 +104,9 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
         </div>
       )}
 
-      <div className="grid grid-cols-1 items-start gap-4.5 lg:grid-cols-[1.15fr_.85fr]">
+      {/* 縦3段: ①該当箇所 → ②なぜ／修正案 → ③判断。
+          上から「どこが問題か」→「なぜ・どう直すか」→「どうするか」の順に読ませる。 */}
+      <div className="flex flex-col gap-4.5">
         <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-7.5 py-6.5 text-[13.5px] leading-[2.1]">
           <h3 className="mb-3.5 text-[14px] font-bold">{fileName}</h3>
           <p className="mt-3.5 font-bold">{finding.evidence_location || finding.label}</p>
@@ -119,8 +121,8 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
           )}
         </div>
 
-        <div>
-          <div className="mb-3.5 rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
+        <div className="grid grid-cols-1 items-start gap-4.5 lg:grid-cols-2">
+          <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
             <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">なぜ対応が必要か</h4>
             <p className="mb-2 text-[13px]">{finding.applicability_reason}</p>
             {change.after_excerpt && (
@@ -138,7 +140,7 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
             </a>
           </div>
 
-          <div className="mb-3.5 rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
+          <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
             <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">修正の提案</h4>
             {finding.fix_proposal ? (
               <>
@@ -151,41 +153,39 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
               <p className="text-[13px] text-[var(--sub)]">自動生成の修正案はありません。内容を確認のうえ、対応方針をご検討ください。</p>
             )}
           </div>
+        </div>
 
-          <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
-            <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
-            <div className="flex flex-wrap gap-2">
-              {STATUSES.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={() => chooseStatus(s.key)}
-                  className={`flex-1 rounded-[9px] border px-4.5 py-2.25 text-center text-[13.5px] ${
-                    status === s.key
-                      ? 'border-[var(--green)] bg-[var(--green)] font-medium text-white'
-                      : 'border-[var(--line)] bg-[var(--card)]'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              disabled={status !== 'approved' || !finding.fix_proposal || downloading}
-              onClick={handleDownload}
-              className="mt-2.5 w-full rounded-[9px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-2.25 text-center text-[13.5px] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {downloading ? '作成中…' : '修正版をダウンロード（承認後）'}
-            </button>
-            {statusError && <p className="mt-2 text-[12px] text-[var(--shu)]">{statusError}</p>}
-            {downloadError && (
-              <p className="mt-2 text-[12px] text-[var(--shu)]">{downloadError}</p>
-            )}
-            <p className="mt-2.5 text-[11.5px] text-[var(--sub)]">
-              ファイルの置き換えはご自身で行ってください。置き換え先: <span className="font-mono">{finding.doc_id}</span>
-            </p>
+        <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
+          <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
+          <div className="flex flex-wrap gap-2">
+            {STATUSES.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => chooseStatus(s.key)}
+                className={`flex-1 rounded-[9px] border px-4.5 py-2.25 text-center text-[13.5px] ${
+                  status === s.key
+                    ? 'border-[var(--green)] bg-[var(--green)] font-medium text-white'
+                    : 'border-[var(--line)] bg-[var(--card)]'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
           </div>
+          <button
+            type="button"
+            disabled={status !== 'approved' || !finding.fix_proposal || downloading}
+            onClick={handleDownload}
+            className="mt-2.5 w-full rounded-[9px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-2.25 text-center text-[13.5px] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {downloading ? '作成中…' : '修正版をダウンロード（承認後）'}
+          </button>
+          {statusError && <p className="mt-2 text-[12px] text-[var(--shu)]">{statusError}</p>}
+          {downloadError && <p className="mt-2 text-[12px] text-[var(--shu)]">{downloadError}</p>}
+          <p className="mt-2.5 text-[11.5px] text-[var(--sub)]">
+            ファイルの置き換えはご自身で行ってください。置き換え先: <span className="font-mono">{finding.doc_id}</span>
+          </p>
         </div>
       </div>
     </>
