@@ -155,8 +155,9 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
           </div>
         </div>
 
-        <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
-          <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
+        {/* 全幅だとボタンが間延びするので、幅を抑えて中央に置く */}
+        <div className="mx-auto w-full max-w-lg rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
+          <h4 className="mb-2.5 text-center text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
           <div className="flex flex-wrap gap-2">
             {STATUSES.map((s) => (
               <button
@@ -181,10 +182,12 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
           >
             {downloading ? '作成中…' : '修正版をダウンロード（承認後）'}
           </button>
-          {statusError && <p className="mt-2 text-[12px] text-[var(--shu)]">{statusError}</p>}
-          {downloadError && <p className="mt-2 text-[12px] text-[var(--shu)]">{downloadError}</p>}
-          <p className="mt-2.5 text-[11.5px] text-[var(--sub)]">
-            ファイルの置き換えはご自身で行ってください。置き換え先: <span className="font-mono">{finding.doc_id}</span>
+          {statusError && <p className="mt-2 text-center text-[12px] text-[var(--shu)]">{statusError}</p>}
+          {downloadError && <p className="mt-2 text-center text-[12px] text-[var(--shu)]">{downloadError}</p>}
+          <p className="mt-2.5 text-center text-[11.5px] leading-relaxed text-[var(--sub)]">
+            ファイルの置き換えはご自身で行ってください。
+            <br />
+            置き換え先: <span className="font-mono">{finding.doc_id}</span>
           </p>
         </div>
       </div>
