@@ -158,7 +158,6 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
 
         {/* 全幅だとボタンが間延びするので、幅を抑えて中央に置く */}
         <div className="mx-auto w-full max-w-lg rounded-xl border border-[var(--line)] bg-[var(--card)] px-5.5 py-4.5">
-          <h4 className="mb-2.5 text-[12.5px] font-bold tracking-wider text-[var(--sub)]">判断</h4>
           <div className="flex flex-wrap gap-2">
             {STATUSES.map((s) => (
               <button
