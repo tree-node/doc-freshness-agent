@@ -12,11 +12,13 @@ export default function Sidebar({ screen, onNavigate }) {
   // 変更の詳細・指摘詳細を見ている間もホームを選択状態にしておく（どこにいるか見失わないように）
   const active = ['event', 'finding'].includes(screen) ? 'home' : screen;
 
+  // 幅252px は「ロゴ30 + 余白 + 鮮度監視エージェント（15px×10字）」が折り返さない実測値。
+  // 名称を変えるときは一緒に見直すこと（ui-mock.html の 196px から広げてある）
   return (
-    <nav className="w-[196px] shrink-0 border-r border-[var(--line)] bg-[var(--card)] px-3.5 py-6.5">
+    <nav className="w-[252px] shrink-0 border-r border-[var(--line)] bg-[var(--card)] px-3.5 py-6.5">
       <div className="flex items-center gap-2.5 px-2.5 pb-5">
         <Logo size={30} title="鮮度監視エージェント" />
-        <div className="min-w-0 text-[15px] font-bold tracking-wide">
+        <div className="text-[15px] font-bold tracking-wide whitespace-nowrap">
           鮮度監視エージェント
           <small className="mt-0.5 block font-mono text-[10.5px] font-normal tracking-wider text-[var(--sub)]">
             DOC FRESHNESS MONITOR
