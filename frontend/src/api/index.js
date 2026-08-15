@@ -11,10 +11,12 @@ export {
   fetchHistory,
   fetchRules,
   fetchStatuses,
+  pollCheck,
   registerRule,
   saveStatus,
   searchLaws,
   setRuleEnabled,
+  startCheck,
 } from './client.js';
 export { buildDocTree, buildReflist, buildFunnelView, changeTabLabel } from './derive.js';
 export * from './format.js';

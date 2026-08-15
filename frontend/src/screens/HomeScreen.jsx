@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Badge from '../components/Badge.jsx';
-import { fetchEvents, fetchHistory, fetchRules } from '../api/index.js';
+import { fetchEvents, fetchHistory, fetchRules, pollCheck, startCheck } from '../api/index.js';
 
 function joinJa(labels) {
   if (labels.length <= 1) return labels.join('');
@@ -74,14 +74,45 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
   const [events, setEvents] = useState(null);
   const [history, setHistory] = useState(null);
   const [rules, setRules] = useState(null);
+  const [checking, setChecking] = useState(false);
+  const [checkLog, setCheckLog] = useState([]);
+  const [checkError, setCheckError] = useState(null);
+
+  async function load() {
+    const list = await fetchEvents();
+    setEvents(
+      [...list].sort((a, b) => b.counts.affected - a.counts.affected || b.counts.needsReview - a.counts.needsReview),
+    );
+    setHistory(await fetchHistory());
+    setRules(await fetchRules());
+  }
 
   useEffect(() => {
-    fetchEvents().then((list) =>
-      setEvents([...list].sort((a, b) => b.counts.affected - a.counts.affected || b.counts.needsReview - a.counts.needsReview)),
-    );
-    fetchHistory().then(setHistory);
-    fetchRules().then(setRules);
+    load();
   }, []);
+
+  /**
+   * 見張っている法令を今すぐ確認する。1件あたり2〜3分かかるので、
+   * 受付だけ先に返してもらい、進み具合を出しながら待つ。
+   */
+  async function checkNow() {
+    setChecking(true);
+    setCheckError(null);
+    setCheckLog(['チェックを始めます…']);
+    try {
+      const job = await startCheck();
+      const done = await pollCheck(job.job_id, (lines) => setCheckLog((prev) => [...prev, ...lines]));
+      if (done.state === 'failed') {
+        setCheckError(done.error);
+      } else {
+        await load();
+      }
+    } catch (e) {
+      setCheckError(e.message);
+    } finally {
+      setChecking(false);
+    }
+  }
 
   if (!events || !history || !rules) {
     return <p className="text-sm text-[var(--sub)]">読み込み中…</p>;
@@ -115,10 +146,31 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
           >
             対応が必要なことを見る
           </button>
-          <button type="button" className="rounded-[9px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-2.5 text-[13.5px]">
-            今すぐチェック
+          <button
+            type="button"
+            disabled={checking}
+            onClick={checkNow}
+            className="rounded-[9px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-2.5 text-[13.5px] disabled:opacity-50"
+          >
+            {checking ? 'チェック中…' : '今すぐチェック'}
           </button>
         </div>
+
+        {(checking || checkLog.length > 0 || checkError) && (
+          <div className="mt-3.5 rounded-[10px] border border-[var(--line)] bg-[var(--card)] px-4.5 py-3.5">
+            {checkLog.map((line, i) => (
+              <p key={i} className={`text-[12.5px] ${i === checkLog.length - 1 && checking ? '' : 'text-[var(--sub)]'}`}>
+                {line}
+              </p>
+            ))}
+            {checkError && <p className="mt-1 text-[12.5px] text-[var(--shu)]">{checkError}</p>}
+            {checking && (
+              <p className="mt-1.5 text-[11.5px] text-[var(--sub)]">
+                法令の条文と社内文書を突き合わせています。2〜3分かかります。
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mb-3 mt-7.5 text-[13px] font-bold tracking-wider text-[var(--sub)]">対応が必要なこと</div>

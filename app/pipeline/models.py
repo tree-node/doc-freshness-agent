@@ -169,6 +169,11 @@ class PipelineResult:
     to_revision: str
     enforcement_date: str | None
     detected_at: str | None = None  # いつ検知したか。画面の「◯◯に検知」に使う
+    # どの条件で流したか。画面の「今すぐチェック」で同じ条件を再現するために残す
+    change_filter: str | None = None
+    # 見つかった変更の総数。処理した件数（changes）より多ければ、確認していない変更がある。
+    # 進捗ログは消えるので、**結果そのものに残す**（黙って切り捨てない）
+    changes_found: int | None = None
     results: list[ChangeResult] = field(default_factory=list)
     alerts: list[Alert] = field(default_factory=list)
     cost: dict[str, Any] = field(default_factory=dict)
@@ -181,6 +186,9 @@ class PipelineResult:
             "to_revision": self.to_revision,
             "enforcement_date": self.enforcement_date,
             "detected_at": self.detected_at,
+            "change_filter": self.change_filter,
+            "changes_found": self.changes_found,
+            "changes_unchecked": max((self.changes_found or len(self.results)) - len(self.results), 0),
             "changes": [r.to_dict() for r in self.results],
             "alerts": [a.to_dict() for a in self.alerts],
             "cost": self.cost,

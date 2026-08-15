@@ -242,3 +242,37 @@ async function errorDetail(res, fallback) {
     return `${fallback}（HTTP ${res.status}）`;
   }
 }
+
+/** チェックを始める。すぐ受付だけ返るので、進捗は pollCheck で追う。 */
+export async function startCheck(lawId) {
+  const res = await fetch('/api/checks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ law_id: lawId ?? null }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res, 'チェックを始められませんでした'));
+  return res.json();
+}
+
+/**
+ * チェックの進み具合を追う。終わる（または失敗する）まで待って最後の状態を返す。
+ * 進捗が来るたびに onProgress を呼ぶので、画面に出せる。
+ */
+export async function pollCheck(jobId, onProgress, { intervalMs = 1500, timeoutMs = 900000 } = {}) {
+  const until = Date.now() + timeoutMs;
+  let seen = 0;
+  while (Date.now() < until) {
+    const res = await fetch(`/api/checks/${encodeURIComponent(jobId)}`);
+    if (!res.ok) throw new Error(await errorDetail(res, 'チェックの状態を取得できませんでした'));
+    const job = await res.json();
+
+    if (job.progress.length > seen) {
+      onProgress?.(job.progress.slice(seen));
+      seen = job.progress.length;
+    }
+    if (job.state !== 'running') return job;
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new Error('チェックが時間内に終わりませんでした');
+}

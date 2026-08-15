@@ -185,6 +185,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"{args.law_id}: 変更なし")
         return 0
 
+    total_diffs = len(event.diffs)
     if args.change_filter:
         matched = [d for d in event.diffs if args.change_filter in d.label]
         if not matched:
@@ -213,6 +214,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             max_changes=args.max_changes,
             cost_log=cost_log,
             progress=print,
+            change_filter=args.change_filter,
+            changes_found=total_diffs,
         )
 
     affected = sum(r.funnel.affected for r in result.results)

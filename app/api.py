@@ -20,7 +20,9 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.egov import EGovClient, EGovError, fetch_snapshot, snapshot_path
+from app.checks import NotReadyError, previous_filter, run_check
 from app.history import load_checks
+from app.jobs import runner
 from app.proposal import edits_from_result, generate_revised_document
 from app.sources.local import UnsupportedFormatError
 from app.store import (
@@ -335,6 +337,65 @@ def update_rule(law_id: str, update: RuleUpdate) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=f"登録されていない正本です: {law_id}")
     set_rule_enabled(law_id, update.enabled, db_path=db_path())
     return {"law_id": law_id, "enabled": update.enabled}
+
+
+class CheckRequest(BaseModel):
+    """今すぐチェックの実行。
+
+    law_id を省くと、登録済みで監視中の正本をすべて順に見る。
+    """
+
+    law_id: str | None = None
+
+
+@router.post("/checks")
+def start_check(payload: CheckRequest) -> dict[str, Any]:
+    """チェックを始める。**すぐに受付だけ返す**（1件2〜3分かかるため）。
+
+    進捗は GET /api/checks/{job_id} で取りに来てもらう。
+    """
+    disabled = disabled_law_ids(db_path=db_path())
+    targets = (
+        [payload.law_id]
+        if payload.law_id
+        else [s["law_id"] for s in _load_snapshots() if s["law_id"] not in disabled]
+    )
+    if not targets:
+        raise HTTPException(status_code=422, detail="監視中の正本がありません")
+
+    known = {snapshot["law_id"] for snapshot in _load_snapshots()}
+    unknown = [law_id for law_id in targets if law_id not in known]
+    if unknown:
+        raise HTTPException(status_code=404, detail=f"登録されていない正本です: {unknown[0]}")
+
+    if runner.running():
+        raise HTTPException(status_code=409, detail="ほかのチェックがまだ実行中です")
+
+    titles = [s["law_title"] for s in _load_snapshots() if s["law_id"] in targets]
+    label = "、".join(t[:14] for t in titles) or "チェック"
+
+    def work(report):
+        results = []
+        for law_id in targets:
+            results.append(
+                run_check(law_id, report, change_filter=previous_filter(law_id))
+            )
+        return {"checked": results}
+
+    try:
+        job = runner.start(label, work)
+    except NotReadyError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return job.to_dict()
+
+
+@router.get("/checks/{job_id}")
+def get_check(job_id: str) -> dict[str, Any]:
+    """チェックの進み具合。終わっていれば結果も入る。"""
+    job = runner.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"見つかりません: {job_id}")
+    return job.to_dict()
 
 
 @router.get("/history")

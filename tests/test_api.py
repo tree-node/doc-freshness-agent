@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -501,3 +502,104 @@ def test_an_unknown_law_id_is_reported(monkeypatch: pytest.MonkeyPatch, snapshot
     res = client.post("/api/rules", json={"law_id": "存在しないID"})
     assert res.status_code == 422
     assert "取得できませんでした" in res.json()["detail"]
+
+
+# --- 今すぐチェック -----------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def fresh_jobs():
+    """ジョブの記録はテストごとに空にする（前のテストの実行中ジョブが残らないように）。"""
+    from app.jobs import runner
+
+    runner._jobs.clear()
+    runner._order.clear()
+    yield
+
+
+def test_check_returns_immediately_with_a_job(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    """押した瞬間に受付だけ返す（1件2〜3分かかるので待たせない）。"""
+    monkeypatch.setattr(api, "run_check", lambda law_id, report, **kw: {"law_id": law_id, "detected": False})
+    res = client.post("/api/checks", json={"law_id": "403AC0000000076"})
+    assert res.status_code == 200
+    assert res.json()["job_id"].startswith("job-")
+
+
+def test_progress_and_result_can_be_polled(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    def fake(law_id, report, **kw):
+        report("法令の最新の条文を確認しています…")
+        report("確認おわり: 3件を確認して、1件が要対応でした")
+        return {"law_id": law_id, "detected": True, "judged": 3, "affected": 1}
+
+    monkeypatch.setattr(api, "run_check", fake)
+    job_id = client.post("/api/checks", json={"law_id": "403AC0000000076"}).json()["job_id"]
+
+    for _ in range(50):
+        body = client.get(f"/api/checks/{job_id}").json()
+        if body["state"] != "running":
+            break
+        time.sleep(0.05)
+
+    assert body["state"] == "done"
+    assert "確認おわり" in body["progress"][-1]
+    assert body["result"]["checked"][0]["affected"] == 1
+
+
+def test_a_failure_is_reported_not_swallowed(monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path) -> None:
+    def boom(law_id, report, **kw):
+        raise RuntimeError("e-Gov に繋がりません")
+
+    monkeypatch.setattr(api, "run_check", boom)
+    job_id = client.post("/api/checks", json={"law_id": "403AC0000000076"}).json()["job_id"]
+
+    for _ in range(50):
+        body = client.get(f"/api/checks/{job_id}").json()
+        if body["state"] != "running":
+            break
+        time.sleep(0.05)
+
+    assert body["state"] == "failed"
+    assert "e-Gov に繋がりません" in body["error"]
+
+
+def test_checking_an_unregistered_law_is_404(snapshots_dir: Path) -> None:
+    assert client.post("/api/checks", json={"law_id": "存在しない"}).status_code == 404
+
+
+def test_unknown_job_is_404() -> None:
+    assert client.get("/api/checks/job-9999").status_code == 404
+
+
+def test_a_stopped_rule_is_not_checked(
+    monkeypatch: pytest.MonkeyPatch, snapshots_dir: Path
+) -> None:
+    """監視を止めている正本は、全体チェックの対象から外れる。"""
+    checked = []
+    monkeypatch.setattr(
+        api, "run_check", lambda law_id, report, **kw: checked.append(law_id) or {"law_id": law_id}
+    )
+    client.put("/api/rules/403AC0000000076", json={"enabled": False})
+    res = client.post("/api/checks", json={})
+    assert res.status_code == 422  # 監視中の正本が無くなるので実行しない
+
+
+def test_previous_filter_falls_back_to_the_single_change(results_dir: Path) -> None:
+    """前回の条件が保存されていなくても、変更1件の結果ならその条から復元する。
+
+    これが無いと、ボタンを押した途端に数十件の変更が流れて何十分もかかる。
+    """
+    from app import checks
+
+    result = a_result()
+    result["change_filter"] = None
+    result["changes"][0]["change"]["target_path"] = "本則 > 第四章　子の看護等休暇 > 第十六条の二"
+    write(results_dir, "403AC0000000076.json", result)
+
+    import app.config
+
+    original = app.config.settings.results_dir
+    object.__setattr__(app.config.settings, "results_dir", results_dir)
+    try:
+        assert checks.previous_filter("403AC0000000076") == "第十六条の二"
+    finally:
+        object.__setattr__(app.config.settings, "results_dir", original)

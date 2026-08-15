@@ -606,3 +606,32 @@ def test_orcarouter_auto_is_rejected(auto_model: str) -> None:
     client = OrcaRouterClient.__new__(OrcaRouterClient)
     with pytest.raises(LLMError, match="orcarouter/auto"):
         client.chat(model=auto_model, system="s", user="u")
+
+
+def test_result_records_how_many_changes_were_left_unchecked() -> None:
+    """処理しなかった変更が残っていることを、結果そのものに残す。
+
+    進捗ログは実行中しか見えないので、そこだけで伝えると、後から結果を見た人には
+    「確認した分がすべて」に見えてしまう（見逃しを隠すことになる）。
+    """
+    index = make_index()
+    chat = FakeChat(pipeline_handler)
+    result = run_pipeline(
+        an_event(),
+        index,
+        chat,
+        ModelSet(stage0="m0", stage2="m2", stage3="m3"),
+        changes_found=27,  # 実際は27件あったが、渡したのは1件だけ
+    )
+    payload = result.to_dict()
+    assert payload["changes_found"] == 27
+    assert payload["changes_unchecked"] == 26
+
+
+def test_nothing_is_left_unchecked_when_everything_was_processed() -> None:
+    index = make_index()
+    chat = FakeChat(pipeline_handler)
+    result = run_pipeline(an_event(), index, chat, ModelSet(stage0="m0", stage2="m2", stage3="m3"))
+    payload = result.to_dict()
+    assert payload["changes_found"] == 1
+    assert payload["changes_unchecked"] == 0

@@ -27,8 +27,16 @@ export default function EventDetailScreen({ eventId, initialChangeId, onHome, on
   const funnel = buildFunnelView(raw, changeResult);
   const cost = formatCostJpy(funnel.costUsd);
 
+  const unchecked = event.raw.changes_unchecked ?? 0;
+
   return (
     <>
+      {unchecked > 0 && (
+        <div className="mb-4 rounded-[10px] border border-[var(--amber-soft)] bg-[var(--amber-soft)] px-4 py-2.5 text-[12.5px] text-[var(--amber)]">
+          この法令には{event.raw.changes_found}件の変更がありますが、確認したのは
+          {event.raw.changes.length}件です。残り{unchecked}件はまだ確認していません。
+        </div>
+      )}
       <Breadcrumb parts={[{ label: 'ホーム', onClick: onHome }, { label: summary.title, current: true }]} />
 
       <div className="mb-5">

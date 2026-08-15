@@ -48,6 +48,8 @@ def run_pipeline(
     max_changes: int | None = None,
     cost_log: CostLog | None = None,
     progress=None,
+    change_filter: str | None = None,
+    changes_found: int | None = None,
 ) -> PipelineResult:
     """1イベント（改正1件）を処理する。"""
     cost_log = cost_log if cost_log is not None else CostLog()
@@ -59,6 +61,8 @@ def run_pipeline(
         to_revision=event.to_revision,
         enforcement_date=event.enforcement_date,
         detected_at=event.detected_at,
+        change_filter=change_filter,
+        changes_found=changes_found if changes_found is not None else len(event.diffs),
     )
 
     def report(message: str) -> None:
