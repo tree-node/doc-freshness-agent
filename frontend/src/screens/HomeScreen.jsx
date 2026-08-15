@@ -22,7 +22,7 @@ function EventGroup({ event, defaultOpen, onOpenEvent, onOpenFinding }) {
         <div className="min-w-0 flex-1">
           <b className="text-[14.5px] font-bold">{event.title}</b>
           <span className="block text-[12px] font-normal text-[var(--sub)]">
-            {event.changesCount}つの変更 ・ {event.enforcement.enforced ? '施行済み' : '施行前'} ・ {event.detectedAtLabel}に検知
+            {event.changesCount}件の変更 ・ {event.enforcement.enforced ? '施行済み' : '施行前'} ・ {event.detectedAtLabel}に検知
           </span>
         </div>
         <span className="flex shrink-0 gap-1.5">

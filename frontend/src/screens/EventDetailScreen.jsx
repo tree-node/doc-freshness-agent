@@ -58,7 +58,7 @@ export default function EventDetailScreen({ eventId, initialChangeId, onHome, on
       </div>
 
       <div className="mb-3 mt-7.5 text-[13px] font-bold tracking-wider text-[var(--sub)]">
-        何が変わったか（{raw.changes.length}つの変更）
+        何が変わったか（{raw.changes.length}件の変更）
       </div>
 
       {raw.changes.length > 1 && (
