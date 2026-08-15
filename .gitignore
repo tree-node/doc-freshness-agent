@@ -76,5 +76,7 @@ Thumbs.db
 # ============================================
 .claude/settings.local.json
 data/results/
+data/results_full/
+data/results_curated/
 data/history.jsonl
 data/outputs/
