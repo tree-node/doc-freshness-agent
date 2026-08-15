@@ -177,3 +177,10 @@ export async function saveStatus(eventId, { changeId, chunkId, docId, status, no
   }
   return res.json();
 }
+
+/** 監査ログ。誰が・いつ・何を根拠に・どう判断したか。 */
+export async function fetchAudit(lawId) {
+  const query = lawId ? `?law_id=${encodeURIComponent(lawId)}` : '';
+  const body = await withFallback(`/api/audit${query}`, () => ({ audit: [] }));
+  return body.audit ?? [];
+}

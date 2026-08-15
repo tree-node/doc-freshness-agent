@@ -1,3 +1,9 @@
+# datetime.UTC を使っているため Python 3.11 以上が必要
+[project]
+name = "doc-freshness-agent"
+version = "0.1.0"
+requires-python = ">=3.11"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

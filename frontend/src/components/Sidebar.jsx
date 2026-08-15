@@ -1,5 +1,15 @@
-/** ui-mock.html nav.side の移植。ホーム以外の画面（チェック履歴・監査ログ・設定）は未実装のため非活性表示のまま。 */
-export default function Sidebar({ screen, onHome }) {
+const ITEMS = [
+  { key: 'home', label: 'ホーム' },
+  { key: 'history', label: 'チェック履歴' },
+  { key: 'audit', label: '監査ログ' },
+  { key: 'settings', label: '設定' },
+];
+
+/** ui-mock.html nav.side の移植。 */
+export default function Sidebar({ screen, onNavigate }) {
+  // 変更の詳細・指摘詳細を見ている間もホームを選択状態にしておく（どこにいるか見失わないように）
+  const active = ['event', 'finding'].includes(screen) ? 'home' : screen;
+
   return (
     <nav className="w-[196px] shrink-0 border-r border-[var(--line)] bg-[var(--card)] px-3.5 py-6.5">
       <div className="px-2.5 pb-5 text-[15px] font-bold tracking-wide">
@@ -8,18 +18,20 @@ export default function Sidebar({ screen, onHome }) {
           DOC FRESHNESS MONITOR
         </small>
       </div>
-      <button
-        type="button"
-        onClick={onHome}
-        className={`mb-0.5 block w-full rounded-lg px-3 py-2 text-left text-[13.5px] ${
-          screen === 'home' ? 'bg-[var(--green-soft)] font-bold text-[var(--green)]' : 'text-[var(--ink)]'
-        }`}
-      >
-        ホーム
-      </button>
-      <span className="mb-0.5 block cursor-default rounded-lg px-3 py-2 text-[13.5px] text-[var(--sub)]">チェック履歴</span>
-      <span className="mb-0.5 block cursor-default rounded-lg px-3 py-2 text-[13.5px] text-[var(--sub)]">監査ログ</span>
-      <span className="mb-0.5 block cursor-default rounded-lg px-3 py-2 text-[13.5px] text-[var(--sub)]">設定</span>
+      {ITEMS.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          onClick={() => onNavigate(item.key)}
+          className={`mb-0.5 block w-full rounded-lg px-3 py-2 text-left text-[13.5px] ${
+            active === item.key
+              ? 'bg-[var(--green-soft)] font-bold text-[var(--green)]'
+              : 'text-[var(--ink)]'
+          }`}
+        >
+          {item.label}
+        </button>
+      ))}
     </nav>
   );
 }

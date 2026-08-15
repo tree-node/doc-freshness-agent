@@ -76,7 +76,7 @@ cd <this-repo>
 cp .env.example .env
 # .env に OrcaRouter の API キー等を設定
 
-# 3. バックエンド
+# 3. バックエンド（Python 3.11 以上）
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload

@@ -4,6 +4,7 @@
  */
 export {
   downloadRevisedDocument,
+  fetchAudit,
   fetchEvent,
   fetchEvents,
   fetchFinding,

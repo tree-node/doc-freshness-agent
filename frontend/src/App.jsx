@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
+import AuditLogScreen from './screens/AuditLogScreen.jsx';
+import HistoryScreen from './screens/HistoryScreen.jsx';
 import HomeScreen from './screens/HomeScreen.jsx';
+import SettingsScreen from './screens/SettingsScreen.jsx';
 import EventDetailScreen from './screens/EventDetailScreen.jsx';
 import FindingDetailScreen from './screens/FindingDetailScreen.jsx';
 
@@ -14,14 +17,18 @@ export default function App() {
   }, [nav]);
 
   const goHome = () => setNav({ screen: 'home' });
+  const goTo = (screen) => setNav({ screen });
   const goEvent = (eventId, changeId) => setNav({ screen: 'event', eventId, changeId });
   const goFinding = (eventId, changeId, chunkId) => setNav({ screen: 'finding', eventId, changeId, chunkId });
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar screen={nav.screen} onHome={goHome} />
+      <Sidebar screen={nav.screen} onNavigate={goTo} />
       <main className="min-w-0 flex-1 px-11 pb-18 pt-9" style={{ maxWidth: 980 }}>
         {nav.screen === 'home' && <HomeScreen onOpenEvent={goEvent} onOpenFinding={goFinding} />}
+        {nav.screen === 'history' && <HistoryScreen onOpenEvent={goEvent} />}
+        {nav.screen === 'audit' && <AuditLogScreen />}
+        {nav.screen === 'settings' && <SettingsScreen />}
         {nav.screen === 'event' && (
           <EventDetailScreen eventId={nav.eventId} initialChangeId={nav.changeId} onHome={goHome} onOpenFinding={goFinding} />
         )}
