@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import Breadcrumb from '../components/Breadcrumb.jsx';
-import { downloadRevisedDocument, fetchEvent, fetchFinding, splitDocPath, truncate } from '../api/index.js';
+import {
+  downloadRevisedDocument,
+  fetchEvent,
+  fetchFinding,
+  fetchStatuses,
+  saveStatus,
+  splitDocPath,
+  truncate,
+} from '../api/index.js';
 
+// バックエンドのステータスと同じ値を使う（app/store.py の STATUSES）
 const STATUSES = [
   { key: 'approved', label: '承認する' },
   { key: 'rejected', label: '対応不要' },
@@ -14,14 +23,41 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
   const [status, setStatus] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
+  const [statusError, setStatusError] = useState(null);
 
   useEffect(() => {
     setDetail(null);
     setStatus(null);
     setDownloadError(null);
+    setStatusError(null);
     fetchEvent(eventId).then(setEvent);
-    fetchFinding(eventId, changeId, chunkId).then(setDetail);
+    fetchFinding(eventId, changeId, chunkId).then(async (found) => {
+      setDetail(found);
+      if (!found) return;
+      // 前に下した判断を復元する（画面を離れても残る）
+      const statuses = await fetchStatuses(eventId);
+      const saved = statuses.get(`${changeId}|${chunkId}|${found.finding.doc_id}`);
+      if (saved) setStatus(saved.status);
+    });
   }, [eventId, changeId, chunkId]);
+
+  /** 判断を保存する。保存できなければ、選んだ見た目だけ変えて終わりにしない。 */
+  async function chooseStatus(next) {
+    const previous = status;
+    setStatus(next);
+    setStatusError(null);
+    try {
+      await saveStatus(eventId, {
+        changeId,
+        chunkId,
+        docId: detail.finding.doc_id,
+        status: next,
+      });
+    } catch (error) {
+      setStatus(previous);
+      setStatusError(error.message);
+    }
+  }
 
   /**
    * 修正版ファイルを受け取る。作るのはサーバー側で、元のファイルには触らない。
@@ -123,7 +159,7 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
                 <button
                   key={s.key}
                   type="button"
-                  onClick={() => setStatus(s.key)}
+                  onClick={() => chooseStatus(s.key)}
                   className={`flex-1 rounded-[9px] border px-4.5 py-2.25 text-center text-[13.5px] ${
                     status === s.key
                       ? 'border-[var(--green)] bg-[var(--green)] font-medium text-white'
@@ -142,6 +178,7 @@ export default function FindingDetailScreen({ eventId, changeId, chunkId, onHome
             >
               {downloading ? '作成中…' : '修正版をダウンロード（承認後）'}
             </button>
+            {statusError && <p className="mt-2 text-[12px] text-[var(--shu)]">{statusError}</p>}
             {downloadError && (
               <p className="mt-2 text-[12px] text-[var(--shu)]">{downloadError}</p>
             )}

@@ -138,3 +138,42 @@ export async function downloadRevisedDocument(eventId, docId) {
   link.remove();
   URL.revokeObjectURL(link.href);
 }
+
+/** この法令変更に対して人が下した判断の一覧（chunk_id + doc_id をキーに引ける形で返す）。 */
+export async function fetchStatuses(eventId) {
+  const body = await withFallback(`/api/events/${encodeURIComponent(eventId)}/statuses`, () => null);
+  const map = new Map();
+  for (const s of body?.statuses ?? []) {
+    map.set(`${s.change_id}|${s.chunk_id}|${s.doc_id}`, s);
+  }
+  return map;
+}
+
+/**
+ * 判断を保存する。棄却（対応不要）も監査ログに残る。
+ * 保存できなかったときは、保存できたふりをせずに投げる。
+ */
+export async function saveStatus(eventId, { changeId, chunkId, docId, status, note, actor }) {
+  const res = await fetch(`/api/events/${encodeURIComponent(eventId)}/statuses`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      change_id: changeId,
+      chunk_id: chunkId,
+      doc_id: docId,
+      status,
+      note: note ?? null,
+      actor: actor ?? '担当者',
+    }),
+  });
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      detail = (await res.json()).detail ?? detail;
+    } catch {
+      /* JSONで返ってこない場合はステータスだけ出す */
+    }
+    throw new Error(`判断を保存できませんでした: ${detail}`);
+  }
+  return res.json();
+}

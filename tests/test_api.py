@@ -237,5 +237,108 @@ def test_download_of_a_missing_file_is_reported(results_dir: Path, watch_dir: Pa
     assert res.status_code == 422
 
 
+# --- 判断の保存と監査ログ ------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def isolated_db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """判断と監査ログのDBはテストごとに分ける（前のテストの記録が混ざらないように）。"""
+    path = tmp_path / "app.sqlite"
+    monkeypatch.setattr(api, "db_path", lambda: path)
+    return path
+
+
+def a_result_with_finding(doc_id="規程.md", chunk_id="規程.md#1"):
+    result = a_result()
+    result["changes"][0]["change"]["summary"] = "子の看護休暇の対象が拡大された"
+    result["changes"][0]["findings"] = [
+        {
+            "chunk_id": chunk_id,
+            "doc_id": doc_id,
+            "impact": "affected",
+            "evidence_location": "第21条",
+            "fix_proposal": {"before": "旧", "after": "新"},
+        }
+    ]
+    return result
+
+
+def test_status_starts_empty(results_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_finding())
+    assert client.get("/api/events/403AC0000000076/statuses").json() == {"statuses": []}
+
+
+def test_saves_a_decision(results_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_finding())
+    res = client.put(
+        "/api/events/403AC0000000076/statuses",
+        json={
+            "change_id": "chg-001",
+            "chunk_id": "規程.md#1",
+            "doc_id": "規程.md",
+            "status": "approved",
+            "actor": "佐藤",
+        },
+    )
+    assert res.status_code == 200
+    assert res.json()["status_label"] == "承認"
+
+    saved = client.get("/api/events/403AC0000000076/statuses").json()["statuses"]
+    assert len(saved) == 1
+    assert saved[0]["status"] == "approved"
+
+
+def test_a_rejection_lands_in_the_audit_log_with_its_basis(results_dir: Path) -> None:
+    """「対応不要」も、何を根拠にそう決めたかとセットで残す。"""
+    write(results_dir, "a.json", a_result_with_finding())
+    client.put(
+        "/api/events/403AC0000000076/statuses",
+        json={
+            "change_id": "chg-001",
+            "chunk_id": "規程.md#1",
+            "doc_id": "規程.md",
+            "status": "rejected",
+            "note": "適用外と判断",
+            "actor": "佐藤",
+        },
+    )
+    entry = client.get("/api/audit").json()["audit"][0]
+    assert entry["to_status_label"] == "棄却"
+    assert entry["actor"] == "佐藤"
+    assert entry["note"] == "適用外と判断"
+    assert entry["evidence_location"] == "第21条"
+    assert "子の看護休暇" in entry["change_summary"]
+    assert entry["law_title"] == "育児・介護休業法"
+
+
+def test_changing_a_decision_keeps_both_in_the_audit_log(results_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_finding())
+    body = {"change_id": "chg-001", "chunk_id": "規程.md#1", "doc_id": "規程.md"}
+    client.put("/api/events/403AC0000000076/statuses", json={**body, "status": "pending"})
+    client.put("/api/events/403AC0000000076/statuses", json={**body, "status": "approved"})
+
+    audit = client.get("/api/audit").json()["audit"]
+    assert [e["to_status"] for e in audit] == ["approved", "pending"]
+    assert audit[0]["from_status"] == "pending"
+
+
+def test_unknown_status_is_rejected(results_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_finding())
+    res = client.put(
+        "/api/events/403AC0000000076/statuses",
+        json={"change_id": "chg-001", "chunk_id": "規程.md#1", "doc_id": "規程.md", "status": "適当"},
+    )
+    assert res.status_code == 422
+
+
+def test_status_for_an_unknown_change_is_404(results_dir: Path) -> None:
+    write(results_dir, "a.json", a_result_with_finding())
+    res = client.put(
+        "/api/events/403AC0000000076/statuses",
+        json={"change_id": "ない", "chunk_id": "規程.md#1", "doc_id": "規程.md", "status": "approved"},
+    )
+    assert res.status_code == 404
+
+
 def test_health_still_works() -> None:
     assert client.get("/api/health").json()["status"] == "ok"

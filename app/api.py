@@ -16,11 +16,13 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from app.config import settings
 from app.history import load_checks
 from app.proposal import edits_from_result, generate_revised_document
 from app.sources.local import UnsupportedFormatError
+from app.store import FindingKey, UnknownStatusError, list_audit, list_statuses, set_status
 
 router = APIRouter(prefix="/api")
 
@@ -45,6 +47,10 @@ def watch_root() -> Path:
 
 def outputs_dir() -> Path:
     return settings.outputs_dir
+
+
+def db_path() -> Path:
+    return settings.db_path
 
 
 def _load_results(directory: Path | None = None) -> list[dict[str, Any]]:
@@ -128,6 +134,85 @@ def download_revised_document(law_id: str, doc_id: str) -> FileResponse:
             "X-Skipped-Count": str(len(generated.skipped)),
         },
     )
+
+
+class StatusUpdate(BaseModel):
+    """判断の登録。誰がどう決めたかを残すため、根拠も一緒に受け取る。"""
+
+    change_id: str
+    chunk_id: str
+    doc_id: str
+    status: str
+    note: str | None = None
+    actor: str = "担当者"
+
+
+@router.get("/events/{law_id}/statuses")
+def list_event_statuses(law_id: str) -> dict[str, Any]:
+    """このイベントに対して人が下した判断の一覧。画面が状態を復元するのに使う。"""
+    return {"statuses": [record.to_dict() for record in list_statuses(law_id, db_path=db_path())]}
+
+
+@router.put("/events/{law_id}/statuses")
+def update_status(law_id: str, update: StatusUpdate) -> dict[str, Any]:
+    """判断を保存する。棄却（対応不要）も含めて監査ログに残す。"""
+    result = get_event(law_id)
+    finding = _find_finding(result, update.change_id, update.chunk_id, update.doc_id)
+    change = _find_change(result, update.change_id)
+
+    try:
+        record = set_status(
+            FindingKey(
+                law_id=law_id,
+                change_id=update.change_id,
+                chunk_id=update.chunk_id,
+                doc_id=update.doc_id,
+            ),
+            status=update.status,
+            actor=update.actor,
+            note=update.note,
+            law_title=result.get("law_title"),
+            # 根拠法令をセットで残す（DESIGN.md 監査ログ）
+            evidence_law=f"{result.get('law_title', '')} {change.get('target_path', '')}".strip() or None,
+            evidence_location=(finding or {}).get("evidence_location"),
+            change_summary=change.get("summary"),
+            db_path=db_path(),
+        )
+    except UnknownStatusError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    return record.to_dict()
+
+
+def _find_change(result: dict, change_id: str) -> dict:
+    for change_result in result.get("changes", []):
+        if change_result["change"]["change_id"] == change_id:
+            return change_result["change"]
+    raise HTTPException(status_code=404, detail=f"変更が見つかりません: {change_id}")
+
+
+def _find_finding(result: dict, change_id: str, chunk_id: str, doc_id: str) -> dict | None:
+    for change_result in result.get("changes", []):
+        if change_result["change"]["change_id"] != change_id:
+            continue
+        for finding in change_result.get("findings", []):
+            if finding.get("chunk_id") == chunk_id:
+                return finding
+    # 起票（alerts）はファイル単位に展開されているので、そちらからも探す
+    for alert in result.get("alerts", []):
+        if alert.get("chunk_id") == chunk_id and alert.get("doc_id") == doc_id:
+            return alert.get("finding")
+    return None
+
+
+@router.get("/audit")
+def list_audit_log(limit: int = 100, law_id: str | None = None) -> dict[str, Any]:
+    """監査ログ。誰が・いつ・何を根拠に・どう判断したかを新しい順に返す。"""
+    return {
+        "audit": [
+            entry.to_dict() for entry in list_audit(limit=limit, law_id=law_id, db_path=db_path())
+        ]
+    }
 
 
 @router.get("/rules")
