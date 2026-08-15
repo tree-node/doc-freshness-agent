@@ -7,19 +7,35 @@ import SettingsScreen from './screens/SettingsScreen.jsx';
 import EventDetailScreen from './screens/EventDetailScreen.jsx';
 import FindingDetailScreen from './screens/FindingDetailScreen.jsx';
 
-// 3画面（ホーム → 変更の詳細 → 指摘詳細）の行き来は、ルーティングライブラリを追加せず
-// 画面状態の切り替えで実装する（DESIGN.md「リッチな作り込みはしない」に合わせる）。
+// 画面の行き来はルーティングライブラリを足さず、画面状態の切り替えで実装する
+// （DESIGN.md「リッチな作り込みはしない」）。ただしブラウザの「戻る」は使われるので、
+// 履歴には積んでおく——積まないと、戻った瞬間にアプリの外へ出てしまう。
+const HOME = { screen: 'home' };
+
 export default function App() {
-  const [nav, setNav] = useState({ screen: 'home' });
+  const [nav, setNav] = useState(HOME);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [nav]);
 
-  const goHome = () => setNav({ screen: 'home' });
-  const goTo = (screen) => setNav({ screen });
-  const goEvent = (eventId, changeId) => setNav({ screen: 'event', eventId, changeId });
-  const goFinding = (eventId, changeId, chunkId) => setNav({ screen: 'finding', eventId, changeId, chunkId });
+  // 「戻る」で1つ前の画面に戻す
+  useEffect(() => {
+    window.history.replaceState(HOME, '');
+    const onPop = (e) => setNav(e.state ?? HOME);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const go = (next) => {
+    window.history.pushState(next, '');
+    setNav(next);
+  };
+
+  const goHome = () => go(HOME);
+  const goTo = (screen) => go({ screen });
+  const goEvent = (eventId, changeId) => go({ screen: 'event', eventId, changeId });
+  const goFinding = (eventId, changeId, chunkId) => go({ screen: 'finding', eventId, changeId, chunkId });
 
   return (
     <div className="flex min-h-screen">
