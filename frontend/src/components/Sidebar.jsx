@@ -1,3 +1,5 @@
+import Logo from './Logo.jsx';
+
 const ITEMS = [
   { key: 'home', label: 'ホーム' },
   { key: 'history', label: 'チェック履歴' },
@@ -12,11 +14,14 @@ export default function Sidebar({ screen, onNavigate }) {
 
   return (
     <nav className="w-[196px] shrink-0 border-r border-[var(--line)] bg-[var(--card)] px-3.5 py-6.5">
-      <div className="px-2.5 pb-5 text-[15px] font-bold tracking-wide">
-        鮮度監視エージェント
-        <small className="mt-0.5 block font-mono text-[10.5px] font-normal tracking-wider text-[var(--sub)]">
-          DOC FRESHNESS MONITOR
-        </small>
+      <div className="flex items-center gap-2.5 px-2.5 pb-5">
+        <Logo size={30} title="鮮度監視エージェント" />
+        <div className="min-w-0 text-[15px] font-bold tracking-wide">
+          鮮度監視エージェント
+          <small className="mt-0.5 block font-mono text-[10.5px] font-normal tracking-wider text-[var(--sub)]">
+            DOC FRESHNESS MONITOR
+          </small>
+        </div>
       </div>
       {ITEMS.map((item) => (
         <button
