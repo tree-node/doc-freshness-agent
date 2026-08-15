@@ -131,7 +131,7 @@ export default function HomeScreen({ onOpenEvent, onOpenFinding }) {
         ) : (
           <h1 className="text-[26px] font-bold leading-[1.5] tracking-wide">
             <span className="text-[var(--shu)]">{actionableEvents.length}件</span>の法令変更により、
-            <span className="text-[var(--shu)]">{totalActionDocs}つ</span>のドキュメントで対応が必要です。
+            <span className="text-[var(--shu)]">{totalActionDocs}個</span>のドキュメントで対応が必要です。
           </h1>
         )}
         {actionableEvents.length > 0 && (
