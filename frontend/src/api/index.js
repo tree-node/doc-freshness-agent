@@ -12,6 +12,7 @@ export {
   fetchRules,
   fetchStatuses,
   saveStatus,
+  setRuleEnabled,
 } from './client.js';
 export { buildDocTree, buildReflist, buildFunnelView, changeTabLabel } from './derive.js';
 export * from './format.js';

@@ -102,14 +102,24 @@ export async function fetchRules() {
   const body = await withFallback('/api/rules', () => null);
   if (body?.rules) {
     return body.rules.map((r) => ({
+      lawId: r.law_id,
       lawTitle: r.law_title,
       source: r.source ?? 'e-Gov',
+      enabled: r.enabled !== false,
+      watchingSince: r.watching_since ?? null,
       schedule: r.last_fetched_at ? `最終チェック ${formatCheckedAt(r.last_fetched_at)}` : '未チェック',
     }));
   }
 
   const events = await fetchEvents();
-  return events.map((e) => ({ lawTitle: e.lawTitle, source: 'e-Gov', schedule: '毎日 9:00' }));
+  return events.map((e) => ({
+    lawId: e.eventId,
+    lawTitle: e.lawTitle,
+    source: 'e-Gov',
+    enabled: true,
+    watchingSince: null,
+    schedule: '毎日 9:00',
+  }));
 }
 
 /**
@@ -183,4 +193,26 @@ export async function fetchAudit(lawId) {
   const query = lawId ? `?law_id=${encodeURIComponent(lawId)}` : '';
   const body = await withFallback(`/api/audit${query}`, () => ({ audit: [] }));
   return body.audit ?? [];
+}
+
+/**
+ * 正本の監視を止める／再開する。
+ * 止めてもスナップショットや検知結果は消えない（見るのをやめるだけ）。
+ */
+export async function setRuleEnabled(lawId, enabled) {
+  const res = await fetch(`/api/rules/${encodeURIComponent(lawId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  });
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      detail = (await res.json()).detail ?? detail;
+    } catch {
+      /* JSONで返ってこない場合はステータスだけ出す */
+    }
+    throw new Error(`監視の切り替えに失敗しました: ${detail}`);
+  }
+  return res.json();
 }

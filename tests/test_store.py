@@ -136,3 +136,42 @@ def test_schema_is_created_on_demand(tmp_path: Path) -> None:
     path = tmp_path / "fresh.sqlite"
     set_status(a_key(), "approved", db_path=path)
     assert get_status(a_key(), db_path=path).status == "approved"
+
+
+# --- 正本の監視のオン/オフ -----------------------------------------------------
+
+
+def test_rules_are_watched_by_default(db: Path) -> None:
+    """登録されていれば監視中。設定した覚えが無いのに止まっている、を作らない。"""
+    from app.store import is_rule_enabled
+
+    assert is_rule_enabled("322AC0000000049", db_path=db) is True
+
+
+def test_can_stop_and_resume_watching(db: Path) -> None:
+    from app.store import disabled_law_ids, is_rule_enabled, set_rule_enabled
+
+    set_rule_enabled("322AC0000000049", False, db_path=db)
+    assert is_rule_enabled("322AC0000000049", db_path=db) is False
+    assert disabled_law_ids(db_path=db) == {"322AC0000000049"}
+
+    set_rule_enabled("322AC0000000049", True, db_path=db)
+    assert is_rule_enabled("322AC0000000049", db_path=db) is True
+    assert disabled_law_ids(db_path=db) == set()
+
+
+def test_stopping_one_rule_leaves_the_others_alone(db: Path) -> None:
+    from app.store import disabled_law_ids, set_rule_enabled
+
+    set_rule_enabled("322AC0000000049", False, db_path=db)
+    assert disabled_law_ids(db_path=db) == {"322AC0000000049"}
+
+
+def test_stopping_a_rule_keeps_the_decisions(db: Path) -> None:
+    """監視を止めても、その正本に対して下した判断は消さない（再開すれば戻る）。"""
+    from app.store import set_rule_enabled
+
+    set_status(a_key(), "approved", db_path=db)
+    set_rule_enabled("322AC0000000049", False, db_path=db)
+    assert get_status(a_key(), db_path=db).status == "approved"
+    assert len(list_audit(db_path=db)) == 1

@@ -22,7 +22,16 @@ from app.config import settings
 from app.history import load_checks
 from app.proposal import edits_from_result, generate_revised_document
 from app.sources.local import UnsupportedFormatError
-from app.store import FindingKey, UnknownStatusError, list_audit, list_statuses, set_status
+from app.store import (
+    FindingKey,
+    UnknownStatusError,
+    disabled_law_ids,
+    is_rule_enabled,
+    list_audit,
+    list_statuses,
+    set_rule_enabled,
+    set_status,
+)
 
 router = APIRouter(prefix="/api")
 
@@ -89,8 +98,14 @@ def _load_snapshots(directory: Path | None = None) -> list[dict[str, Any]]:
 
 @router.get("/events")
 def list_events() -> dict[str, Any]:
-    """検知した変更イベントの一覧。ホームが読む。"""
-    return {"events": _load_results()}
+    """検知した変更イベントの一覧。ホームが読む。
+
+    **監視を止めている正本のイベントは出さない**。止めた瞬間にホームから指摘が消え、
+    再開すると戻る——正本と社内文書の依存関係が目に見える。
+    検知結果そのものは消していないので、再開すればそのまま復活する。
+    """
+    disabled = disabled_law_ids(db_path=db_path())
+    return {"events": [r for r in _load_results() if r["law_id"] not in disabled]}
 
 
 @router.get("/events/{law_id}")
@@ -226,10 +241,28 @@ def list_rules() -> dict[str, Any]:
             "watching_since": snapshot.get("asof"),
             "last_fetched_at": snapshot.get("fetched_at"),
             "revision": snapshot.get("law_revision_id"),
+            "enabled": is_rule_enabled(snapshot["law_id"], db_path=db_path()),
         }
         for snapshot in _load_snapshots()
     ]
     return {"rules": rules}
+
+
+class RuleUpdate(BaseModel):
+    enabled: bool
+
+
+@router.put("/rules/{law_id}")
+def update_rule(law_id: str, update: RuleUpdate) -> dict[str, Any]:
+    """正本の監視を止める／再開する。
+
+    止めてもスナップショットや検知結果は消さない。見るのをやめるだけ。
+    """
+    known = {snapshot["law_id"] for snapshot in _load_snapshots()}
+    if law_id not in known:
+        raise HTTPException(status_code=404, detail=f"登録されていない正本です: {law_id}")
+    set_rule_enabled(law_id, update.enabled, db_path=db_path())
+    return {"law_id": law_id, "enabled": update.enabled}
 
 
 @router.get("/history")

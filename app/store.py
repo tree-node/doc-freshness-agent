@@ -60,6 +60,14 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 
 CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log (at DESC);
+
+-- 正本ごとの監視のオン/オフ。行が無ければ「監視中」とみなす
+-- （登録されている＝スナップショットがある、が監視の実体なので、既定は有効）
+CREATE TABLE IF NOT EXISTS rule_settings (
+    law_id     TEXT PRIMARY KEY,
+    enabled    INTEGER NOT NULL DEFAULT 1,
+    updated_at TEXT NOT NULL
+);
 """
 
 
@@ -231,3 +239,39 @@ def list_audit(limit: int = 100, law_id: str | None = None, db_path: Path | None
         _ensure_schema(conn)
         rows = conn.execute(query, params).fetchall()
     return [AuditEntry(**{k: v for k, v in dict(row).items() if k != "id"}) for row in rows]
+
+
+# --- 正本の監視のオン/オフ -------------------------------------------------
+
+
+def set_rule_enabled(law_id: str, enabled: bool, db_path: Path | None = None) -> bool:
+    """正本の監視を止める／再開する。
+
+    止めても**スナップショットや過去の検知結果は消さない**。再開すればそのまま戻る。
+    「この正本を見るのをやめる」だけであって、記録を消す操作ではない。
+    """
+    now = datetime.now(UTC).isoformat(timespec="seconds")
+    with connection(db_path) as conn:
+        _ensure_schema(conn)
+        conn.execute(
+            """INSERT INTO rule_settings (law_id, enabled, updated_at) VALUES (?, ?, ?)
+               ON CONFLICT (law_id) DO UPDATE SET
+                   enabled = excluded.enabled, updated_at = excluded.updated_at""",
+            (law_id, 1 if enabled else 0, now),
+        )
+    return enabled
+
+
+def is_rule_enabled(law_id: str, db_path: Path | None = None) -> bool:
+    with connection(db_path) as conn:
+        _ensure_schema(conn)
+        row = conn.execute("SELECT enabled FROM rule_settings WHERE law_id = ?", (law_id,)).fetchone()
+    return True if row is None else bool(row["enabled"])
+
+
+def disabled_law_ids(db_path: Path | None = None) -> set[str]:
+    """監視を止めている正本。行が無いものは監視中なので出てこない。"""
+    with connection(db_path) as conn:
+        _ensure_schema(conn)
+        rows = conn.execute("SELECT law_id FROM rule_settings WHERE enabled = 0").fetchall()
+    return {row["law_id"] for row in rows}

@@ -342,3 +342,56 @@ def test_status_for_an_unknown_change_is_404(results_dir: Path) -> None:
 
 def test_health_still_works() -> None:
     assert client.get("/api/health").json()["status"] == "ok"
+
+
+# --- 正本の監視のオン/オフ -----------------------------------------------------
+
+
+@pytest.fixture
+def snapshots_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    directory = tmp_path / "snapshots"
+    directory.mkdir()
+    (directory / "403AC0000000076.json").write_text(
+        json.dumps(
+            {
+                "law_id": "403AC0000000076",
+                "law_title": "育児・介護休業法",
+                "law_revision_id": "rev",
+                "asof": "2025-03-01",
+                "fetched_at": "2026-08-15T00:00:00+00:00",
+                "provisions": {},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(api, "snapshots_dir", lambda: directory)
+    return directory
+
+
+def test_rules_are_enabled_by_default(snapshots_dir: Path) -> None:
+    assert client.get("/api/rules").json()["rules"][0]["enabled"] is True
+
+
+def test_stopping_a_rule_hides_its_events_from_home(results_dir: Path, snapshots_dir: Path) -> None:
+    """止めるとホームから消え、再開すると戻る（デモで見せる依存関係）。"""
+    write(results_dir, "a.json", a_result())
+    assert len(client.get("/api/events").json()["events"]) == 1
+
+    client.put("/api/rules/403AC0000000076", json={"enabled": False})
+    assert client.get("/api/events").json()["events"] == []
+    assert client.get("/api/rules").json()["rules"][0]["enabled"] is False
+
+    client.put("/api/rules/403AC0000000076", json={"enabled": True})
+    assert len(client.get("/api/events").json()["events"]) == 1
+
+
+def test_stopping_a_rule_does_not_delete_the_result(results_dir: Path, snapshots_dir: Path) -> None:
+    """止めても検知結果そのものは残す（見るのをやめるだけ）。"""
+    write(results_dir, "a.json", a_result())
+    client.put("/api/rules/403AC0000000076", json={"enabled": False})
+    assert client.get("/api/events/403AC0000000076").status_code == 200
+
+
+def test_stopping_an_unregistered_rule_is_404(snapshots_dir: Path) -> None:
+    assert client.put("/api/rules/存在しない", json={"enabled": False}).status_code == 404
